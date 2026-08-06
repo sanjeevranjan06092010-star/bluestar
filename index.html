@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blue Sky - Premium OTT Streaming & Live Sports</title>
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ========================================== -->
+  <!-- PHASE 1: WELCOME NAME ENTRY SCREEN         -->
+  <!-- ========================================== -->
+  <div id="welcome-screen" class="welcome-screen">
+    <div class="welcome-bg-glow"></div>
+    <div class="welcome-container">
+      <div class="welcome-logo">
+        <img src="logo.svg" alt="Blue Sky Logo" id="landing-logo">
+      </div>
+      
+      <div class="welcome-card">
+        <h2>Ready to Explore?</h2>
+        <p>Enter your name to unlock unlimited streaming, movies, series, and live sports on Blue Sky.</p>
+        
+        <form id="name-form" onsubmit="event.preventDefault(); handleNameSubmit();">
+          <div class="input-group">
+            <input type="text" id="username-input" autocomplete="off" placeholder=" " required minlength="2" maxlength="20">
+            <label for="username-input">Enter Your Name</label>
+            <div class="input-glow"></div>
+          </div>
+          
+          <button type="submit" class="btn-primary" id="btn-enter">
+            <span>Start Watching</span>
+            <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- PHASE 2: MAIN OTT DASHBOARD                -->
+  <!-- ========================================== -->
+  <div id="main-dashboard" class="main-dashboard hidden">
+    <!-- Header Navigation -->
+    <header class="main-header">
+      <div class="header-left">
+        <div class="header-logo" id="header-logo-btn">
+          <img src="logo.svg" alt="Blue Sky Logo">
+        </div>
+        <nav class="nav-menu">
+          <button class="nav-link active" data-category="all">Home</button>
+          <button class="nav-link" data-category="tv">TV Shows</button>
+          <button class="nav-link" data-category="movies">Movies</button>
+          <button class="nav-link" data-category="sports">Sports</button>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <!-- Search bar -->
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search movies, shows, sports...">
+          <button id="clear-search-btn" class="clear-search hidden">&times;</button>
+        </div>
+
+        <!-- User profile display -->
+        <div class="user-profile">
+          <div class="profile-avatar" id="profile-dropdown-btn">
+            <span id="avatar-initial">U</span>
+          </div>
+          <div class="profile-info">
+            <span class="welcome-text">Welcome,</span>
+            <span class="profile-name" id="user-display-name">User</span>
+          </div>
+          
+          <!-- Dropdown menu -->
+          <div class="profile-dropdown" id="profile-dropdown-menu">
+            <div class="dropdown-header">
+              <p class="dropdown-greeting">Signing in as</p>
+              <p class="dropdown-username" id="dropdown-display-name">User</p>
+            </div>
+            <hr class="dropdown-divider">
+            <button class="dropdown-item" onclick="changeName()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dropdown-icon">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              Change Name
+            </button>
+            <button class="dropdown-item logout" onclick="logout()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dropdown-icon">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Exit Application
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+      
+      <!-- HERO CAROUSEL -->
+      <section class="hero-carousel-section" id="hero-carousel-container">
+        <div class="carousel-track-container">
+          <div class="carousel-track" id="carousel-track">
+            <!-- Carousel slides dynamically loaded by JavaScript -->
+          </div>
+        </div>
+        
+        <!-- Controls -->
+        <button class="carousel-btn btn-left" id="carousel-prev-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <button class="carousel-btn btn-right" id="carousel-next-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+        
+        <!-- Indicators -->
+        <div class="carousel-nav" id="carousel-indicators">
+          <!-- Dots loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- RESULTS HEADER (ONLY SHOWN WHEN SEARCHING OR FILTERING) -->
+      <div id="results-header" class="results-header hidden">
+        <h2>Showing results for "<span id="search-query-text"></span>"</h2>
+        <button class="btn-text" id="reset-filters-btn">Clear Filter</button>
+      </div>
+
+      <!-- DYNAMIC ROWS CONTAINER -->
+      <div class="rows-container" id="rows-container">
+        <!-- Content rows (Sports, Movies, TV Shows) dynamically generated -->
+      </div>
+      
+    </main>
+
+    <!-- Sleek OTT Footer -->
+    <footer class="main-footer">
+      <div class="footer-links">
+        <a href="#">About Us</a>
+        <a href="#">Help Center</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Careers</a>
+      </div>
+      <div class="footer-copy">
+        <p>&copy; 2026 Blue Sky Streaming Service. All Rights Reserved. Recreated beautifully for you.</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- PHASE 3: INTERACTIVE VIDEO PLAYER & MODAL   -->
+  <!-- ========================================== -->
+  <div id="detail-modal" class="modal hidden">
+    <div class="modal-backdrop" id="modal-close-backdrop"></div>
+    <div class="modal-wrapper">
+      <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+      
+      <!-- Video Player Section -->
+      <div class="modal-player-container">
+        <!-- Fake Video / Graphic Layer -->
+        <div class="video-display" id="video-display">
+          <div class="video-poster-bg" id="player-poster-bg"></div>
+          <div class="video-overlay">
+            <div class="video-loading-spinner hidden" id="video-spinner"></div>
+            <div class="play-state-overlay" id="play-state-overlay">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+            </div>
+            
+            <!-- Dynamic Info in top left of player -->
+            <div class="video-tag" id="player-tag">Blue Sky Premium</div>
+          </div>
+        </div>
+
+        <!-- Custom Video Controls -->
+        <div class="video-controls">
+          <div class="timeline-container">
+            <div class="timeline-progress" id="player-progress"></div>
+            <input type="range" class="timeline-slider" id="player-timeline" min="0" max="100" value="0">
+          </div>
+          
+          <div class="controls-row">
+            <div class="controls-left">
+              <button class="control-btn" id="player-play-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor" class="icon-play"><path d="M8 5v14l11-7z"></path></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor" class="icon-pause hidden"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
+              </button>
+              <button class="control-btn" id="player-skip-back">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 0-7.07 2.93L2 8V2M2 8h6"></path><path d="M2.05 12.5a10 10 0 1 0 9.95-10.5"></path></svg>
+              </button>
+              <button class="control-btn" id="player-skip-forward">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 7.07 2.93L22 8V2M22 8h-6"></path><path d="M21.95 12.5A10 10 0 1 1 12 2"></path></svg>
+              </button>
+              
+              <div class="volume-container">
+                <button class="control-btn" id="player-mute-btn">
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="icon-volume"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="icon-muted hidden"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>
+                </button>
+                <input type="range" class="volume-slider" id="player-volume" min="0" max="100" value="80">
+              </div>
+              
+              <div class="time-display">
+                <span id="player-time-current">0:00</span> / <span id="player-time-total">2:15</span>
+              </div>
+            </div>
+            
+            <div class="controls-right">
+              <button class="control-btn" id="player-fullscreen-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"></path></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Info Section -->
+      <div class="modal-detail-content">
+        <div class="modal-meta-row">
+          <span class="modal-rating" id="modal-rating">IMDb 8.7</span>
+          <span class="modal-year" id="modal-year">2026</span>
+          <span class="modal-duration" id="modal-duration">2h 15m</span>
+          <span class="modal-hd-badge">4K Ultra HD</span>
+          <span class="modal-cc-badge">5.1 Audio</span>
+        </div>
+        
+        <h1 class="modal-title" id="modal-title">Movie Title Here</h1>
+        <p class="modal-genres" id="modal-genres">Action • Thriller • Sci-Fi</p>
+        <p class="modal-description" id="modal-description">
+          A thrilling story about a group of astronauts navigating a dangerous nebula to save their home planet. Expect stellar visuals and high-stakes drama.
+        </p>
+
+        <!-- Dynamic Cast List -->
+        <div class="modal-cast-section">
+          <h3>Starring:</h3>
+          <p id="modal-cast">Chris Hemsworth, Tom Hiddleston, Natalie Portman</p>
+        </div>
+
+        <!-- Similar Content Recommendations -->
+        <div class="similar-content-section">
+          <h3>More Like This</h3>
+          <div class="similar-grid" id="similar-grid">
+            <!-- Loaded dynamically based on item selected -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
