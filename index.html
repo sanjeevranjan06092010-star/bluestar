@@ -19,7 +19,7 @@
     <div class="welcome-bg-glow"></div>
     <div class="welcome-container">
       <div class="welcome-logo">
-        <img src="logo.jpg" alt="Blue Sky Logo" id="landing-logo">
+        <img src="logo.png" alt="Blue Sky Logo" id="landing-logo">
       </div>
       
       <div class="welcome-card">
@@ -53,14 +53,8 @@
     <header class="main-header">
       <div class="header-left">
         <div class="header-logo" id="header-logo-btn">
-          <img src="logo.jpg" alt="Blue Sky Logo">
+          <img src="logo.png" alt="Blue Sky Logo">
         </div>
-        <nav class="nav-menu">
-          <button class="nav-link active" data-category="all">Home</button>
-          <button class="nav-link" data-category="tv">TV Shows</button>
-          <button class="nav-link" data-category="movies">Movies</button>
-          <button class="nav-link" data-category="sports">Sports</button>
-        </nav>
       </div>
 
       <div class="header-right">
@@ -110,6 +104,44 @@
         </div>
       </div>
     </header>
+
+    <!-- Repositioned Bottom Navigation (Moved out of header to prevent backdrop-filter containing block trapping) -->
+    <nav class="nav-menu">
+      <button class="nav-link active" data-category="all">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-link" data-category="tv">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="20" height="15" x="2" y="7" rx="2" ry="2"/>
+          <polyline points="17 2 12 7 7 2"/>
+        </svg>
+        <span>TV Shows</span>
+      </button>
+      <button class="nav-link" data-category="movies">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="22" height="16" x="1" y="4" rx="2"/>
+          <path d="M1 10h22"/>
+          <path d="M1 15h22"/>
+          <path d="M4 4v16"/>
+          <path d="M20 4v16"/>
+        </svg>
+        <span>Movies</span>
+      </button>
+      <button class="nav-link" data-category="sports">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+          <path d="M4 22h16"/>
+          <path d="M10 14.66V17c0 .55-.45 1-1 1H4v2h16v-2h-5c-.55 0-1-.45-1-1v-2.34"/>
+          <path d="M12 2a7.7 7.7 0 0 1 7.54 8H4.46A7.7 7.7 0 0 1 12 2z"/>
+        </svg>
+        <span>Sports</span>
+      </button>
+    </nav>
 
     <!-- Main Content Container -->
     <main class="main-content">

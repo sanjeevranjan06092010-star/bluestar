@@ -332,10 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set up navigation tab listeners
   const navLinks = document.querySelectorAll('.nav-link');
   navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
+    link.addEventListener('click', () => {
       navLinks.forEach(l => l.classList.remove('active'));
-      e.target.classList.add('active');
-      const category = e.target.getAttribute('data-category');
+      link.classList.add('active');
+      const category = link.getAttribute('data-category');
       handleCategoryFilter(category);
     });
   });
