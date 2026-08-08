@@ -626,7 +626,8 @@ function handleCategoryFilter(category) {
   state.searchQuery = '';
   const searchInput = document.getElementById('search-input');
   if (searchInput) searchInput.value = '';
-  document.getElementById('clear-search-btn').classList.add('hidden');
+  const clearSearchBtn = document.getElementById('clear-search-btn');
+  if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
   document.getElementById('results-header').classList.add('hidden');
 
   const heroSection = document.getElementById('hero-carousel-container');
@@ -738,7 +739,8 @@ function resetFilters() {
   const searchInput = document.getElementById('search-input');
   if (searchInput) searchInput.value = '';
   state.searchQuery = '';
-  document.getElementById('clear-search-btn').classList.add('hidden');
+  const clearSearchBtn = document.getElementById('clear-search-btn');
+  if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
   document.getElementById('results-header').classList.add('hidden');
   
   const navLinks = document.querySelectorAll('.nav-link');

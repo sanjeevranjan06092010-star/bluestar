@@ -3,12 +3,12 @@
    ========================================================================== */
 
 :root {
-  --bg-primary: #060b12;
-  --bg-secondary: #0c1524;
-  --bg-tertiary: #162235;
-  --accent-color: #0080ff;
-  --accent-hover: #3399ff;
-  --accent-glow: rgba(0, 128, 255, 0.4);
+  --bg-primary: #050505;
+  --bg-secondary: #0d0d0d;
+  --bg-tertiary: #141414;
+  --accent-color: #ff007f;
+  --accent-hover: #ff3399;
+  --accent-glow: rgba(255, 0, 127, 0.4);
   --text-primary: #ffffff;
   --text-secondary: #8f98a6;
   --text-muted: #5e6875;
@@ -19,7 +19,7 @@
   --font-title: 'Outfit', sans-serif;
   --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   --card-radius: 12px;
-  --glass-bg: rgba(12, 21, 36, 0.65);
+  --glass-bg: rgba(10, 10, 10, 0.65);
   --glass-border: rgba(255, 255, 255, 0.08);
 }
 
@@ -102,7 +102,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 50%, #0d1e36 0%, var(--bg-primary) 70%);
+  background: radial-gradient(circle at 50% 50%, #121212 0%, var(--bg-primary) 70%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -117,8 +117,8 @@ body {
   left: -10%;
   width: 120%;
   height: 120%;
-  background: radial-gradient(circle at 10% 20%, rgba(0, 128, 255, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at 90% 80%, rgba(37, 99, 235, 0.15) 0%, transparent 40%);
+  background: radial-gradient(circle at 10% 20%, rgba(255, 0, 127, 0.15) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(255, 64, 129, 0.15) 0%, transparent 40%);
   z-index: 1;
   animation: bgPulse 12s infinite alternate ease-in-out;
 }
@@ -141,10 +141,13 @@ body {
 }
 
 .welcome-logo {
-  height: 180px;
-  margin-bottom: 30px;
-  filter: drop-shadow(0 0 25px rgba(0, 128, 255, 0.35));
+  height: 380px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 45px rgba(255, 0, 127, 0.6));
   transition: transform 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .welcome-logo:hover {
   transform: scale(1.03);
@@ -153,6 +156,7 @@ body {
 .welcome-logo img {
   height: 100%;
   object-fit: contain;
+  transform: scale(2.8);
 }
 
 .welcome-card {
@@ -165,7 +169,7 @@ body {
   border-radius: 20px;
   text-align: center;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 
-              0 0 40px rgba(0, 128, 255, 0.05);
+              0 0 40px rgba(255, 0, 127, 0.05);
 }
 
 .welcome-card h2 {
@@ -227,14 +231,14 @@ body {
 .input-group input:focus {
   border-color: var(--accent-color);
   box-shadow: 0 0 15px var(--accent-glow);
-  background: rgba(0, 128, 255, 0.02);
+  background: rgba(255, 0, 127, 0.02);
 }
 
 /* Enter button */
 .btn-primary {
   width: 100%;
   padding: 16px;
-  background: linear-gradient(135deg, var(--accent-color) 0%, #0052d4 100%);
+  background: linear-gradient(135deg, var(--accent-color) 0%, #880e4f 100%);
   border: none;
   border-radius: 12px;
   color: var(--text-primary);
@@ -246,7 +250,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 8px 20px rgba(0, 128, 255, 0.25);
+  box-shadow: 0 8px 20px rgba(255, 0, 127, 0.25);
   transition: var(--transition-smooth);
   position: relative;
   overflow: hidden;
@@ -269,8 +273,8 @@ body {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(0, 128, 255, 0.4);
-  background: linear-gradient(135deg, var(--accent-hover) 0%, #0a65ff 100%);
+  box-shadow: 0 12px 25px rgba(255, 0, 127, 0.4);
+  background: linear-gradient(135deg, var(--accent-hover) 0%, #ad1457 100%);
 }
 
 .btn-primary:active {
@@ -329,12 +333,12 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 95px;
+  height: 130px;
   padding: 0 5%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(to bottom, rgba(6, 11, 18, 0.95) 80%, rgba(6, 11, 18, 0));
+  background: linear-gradient(to bottom, rgba(5, 5, 5, 0.95) 80%, rgba(5, 5, 5, 0));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 100;
@@ -344,13 +348,42 @@ body {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
+}
+
+.hamburger-menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 16px;
+  padding: 0;
+  z-index: 110;
+  transition: var(--transition-smooth);
+}
+
+.hamburger-menu-btn span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 2px;
+  transition: var(--transition-smooth);
+}
+
+.hamburger-menu-btn:hover span {
+  background-color: var(--accent-color);
 }
 
 .header-logo {
-  height: 70px;
+  height: 110px;
   cursor: pointer;
   transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .header-logo:hover {
@@ -360,6 +393,8 @@ body {
 .header-logo img {
   height: 100%;
   object-fit: contain;
+  transform: scale(2.8);
+  transform-origin: left center;
 }
 
 .nav-menu {
@@ -367,7 +402,7 @@ body {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(12, 21, 36, 0.75);
+  background: rgba(10, 10, 10, 0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -379,14 +414,14 @@ body {
   padding: 8px 24px;
   z-index: 1000;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 
-              0 0 30px rgba(0, 128, 255, 0.1);
+              0 0 30px rgba(255, 0, 127, 0.1);
   transition: var(--transition-smooth);
 }
 
 .nav-menu:hover {
-  border-color: rgba(0, 128, 255, 0.3);
+  border-color: rgba(255, 0, 127, 0.3);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 
-              0 0 40px rgba(0, 128, 255, 0.2);
+              0 0 40px rgba(255, 0, 127, 0.2);
 }
 
 .nav-link {
@@ -424,7 +459,7 @@ body {
 
 .nav-link.active {
   color: #ffffff;
-  background: linear-gradient(135deg, var(--accent-color) 0%, #0052d4 100%);
+  background: linear-gradient(135deg, var(--accent-color) 0%, #880e4f 100%);
   box-shadow: 0 4px 15px var(--accent-glow);
 }
 
@@ -476,7 +511,7 @@ body {
   width: 320px;
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--accent-color);
-  box-shadow: 0 0 15px rgba(0, 128, 255, 0.2);
+  box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
 }
 
 .search-icon {
@@ -531,14 +566,14 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0080ff, #00c6ff);
+  background: linear-gradient(135deg, #ff007f, #ff4081);
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: 700;
   color: var(--text-primary);
   font-family: var(--font-title);
-  box-shadow: 0 0 10px rgba(0, 128, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
 }
 
 .profile-info {
@@ -657,7 +692,7 @@ body {
 
 .main-content {
   flex: 1;
-  padding-top: 110px; /* offset for header */
+  padding-top: 150px; /* offset for header */
   padding-bottom: 120px;
   width: 100%;
   max-width: 1440px;
@@ -715,7 +750,7 @@ body {
   left: 0;
   width: 100%;
   height: 70%;
-  background: linear-gradient(to top, var(--bg-primary) 10%, rgba(6, 11, 18, 0.8) 40%, transparent 100%);
+  background: linear-gradient(to top, var(--bg-primary) 10%, rgba(5, 5, 5, 0.8) 40%, transparent 100%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -817,7 +852,7 @@ body {
   transform: translateY(-50%);
   width: 50px;
   height: 50px;
-  background: rgba(6, 11, 18, 0.4);
+  background: rgba(5, 5, 5, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 50%;
   color: var(--text-primary);
@@ -831,7 +866,7 @@ body {
 }
 
 .carousel-btn:hover {
-  background: rgba(0, 128, 255, 0.6);
+  background: rgba(255, 0, 127, 0.6);
   border-color: var(--accent-color);
   color: var(--text-primary);
 }
@@ -977,7 +1012,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to top, rgba(6, 11, 18, 0.9) 0%, rgba(6, 11, 18, 0.4) 50%, transparent 100%);
+  background: linear-gradient(to top, rgba(5, 5, 5, 0.9) 0%, rgba(5, 5, 5, 0.4) 50%, transparent 100%);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -1051,7 +1086,7 @@ body {
 
 /* Portrait Card Specific overlays (only shows details on hover or kept simple) */
 .media-card.portrait .card-overlay {
-  background: linear-gradient(to top, rgba(6, 11, 18, 0.95) 0%, rgba(6, 11, 18, 0.2) 60%, transparent 100%);
+  background: linear-gradient(to top, rgba(5, 5, 5, 0.95) 0%, rgba(5, 5, 5, 0.2) 60%, transparent 100%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -1063,9 +1098,9 @@ body {
 /* Zoom Hover Effect */
 .media-card:hover {
   transform: scale(1.06) translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 128, 255, 0.25), 
-              0 0 15px rgba(0, 128, 255, 0.1);
-  border-color: rgba(0, 128, 255, 0.4);
+  box-shadow: 0 15px 30px rgba(255, 0, 127, 0.25), 
+              0 0 15px rgba(255, 0, 127, 0.1);
+  border-color: rgba(255, 0, 127, 0.4);
   z-index: 5;
 }
 
@@ -1136,7 +1171,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: rgba(6, 11, 18, 0.5);
+  background: rgba(5, 5, 5, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
   font-size: 20px;
@@ -1200,7 +1235,7 @@ body {
   top: 20px;
   left: 20px;
   padding: 4px 10px;
-  background: rgba(0, 128, 255, 0.8);
+  background: rgba(255, 0, 127, 0.8);
   border-radius: 4px;
   font-size: 11px;
   font-weight: 700;
@@ -1210,7 +1245,7 @@ body {
 .play-state-overlay {
   width: 70px;
   height: 70px;
-  background: rgba(0, 128, 255, 0.85);
+  background: rgba(255, 0, 127, 0.85);
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -1491,7 +1526,7 @@ body {
 .similar-card:hover {
   transform: translateY(-3px);
   border-color: var(--accent-color);
-  box-shadow: 0 5px 15px rgba(0, 128, 255, 0.2);
+  box-shadow: 0 5px 15px rgba(255, 0, 127, 0.2);
 }
 
 .similar-overlay {
