@@ -86,10 +86,11 @@ body {
   pointer-events: none;
 }
 
-.splash-gif {
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
+.splash-img {
+  width: 90%;
+  max-width: 380px;
+  height: auto;
+  object-fit: contain;
 }
 
 /* ==========================================================================
