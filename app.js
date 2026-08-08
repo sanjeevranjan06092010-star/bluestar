@@ -303,7 +303,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const savedName = localStorage.getItem('bluesky_username');
   if (savedName) {
     state.userName = savedName;
+    const welcomeScreen = document.getElementById('welcome-screen');
+    if (welcomeScreen) welcomeScreen.classList.add('hidden');
     switchToDashboard();
+  }
+
+  // Handle splash screen preloader timeout
+  const splashScreen = document.getElementById('splash-screen');
+  if (splashScreen) {
+    setTimeout(() => {
+      splashScreen.classList.add('fade-out');
+      setTimeout(() => {
+        splashScreen.classList.add('hidden');
+      }, 800); // Match transition duration (0.8s)
+    }, 3000); // Splash screen display duration (3 seconds)
   }
   
   // Set up profile dropdown triggers
