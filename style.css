@@ -141,8 +141,8 @@ body {
 }
 
 .welcome-logo {
-  height: 380px;
-  margin-bottom: 20px;
+  height: 60px;
+  margin-bottom: 30px;
   filter: drop-shadow(0 0 45px rgba(255, 0, 127, 0.6));
   transition: transform 0.3s ease;
   display: flex;
@@ -156,7 +156,6 @@ body {
 .welcome-logo img {
   height: 100%;
   object-fit: contain;
-  transform: scale(2.8);
 }
 
 .welcome-card {
@@ -348,7 +347,7 @@ body {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 }
 
 .hamburger-menu-btn {
@@ -379,7 +378,7 @@ body {
 }
 
 .header-logo {
-  height: 110px;
+  height: 35px;
   cursor: pointer;
   transition: transform 0.3s ease;
   display: flex;
@@ -393,8 +392,6 @@ body {
 .header-logo img {
   height: 100%;
   object-fit: contain;
-  transform: scale(2.8);
-  transform-origin: left center;
 }
 
 .nav-menu {
@@ -1613,6 +1610,9 @@ body {
     height: 70px;
     padding: 0 4%;
   }
+  .header-logo {
+    height: 25px;
+  }
   .nav-menu {
     display: none; /* hidden on small mobile screens */
   }
@@ -1657,8 +1657,15 @@ body {
 }
 
 @media (max-width: 480px) {
+  .welcome-logo {
+    height: 40px;
+    margin-bottom: 20px;
+  }
   .welcome-card {
     padding: 30px 20px;
+  }
+  .header-logo {
+    height: 20px;
   }
   .welcome-card h2 {
     font-size: 22px;
