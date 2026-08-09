@@ -15,8 +15,8 @@
   --success: #22c55e;
   --danger: #ef4444;
   
-  --font-main: 'Inter', sans-serif;
-  --font-title: 'Outfit', sans-serif;
+  --font-main: 'Noto Sans', 'Inter', sans-serif;
+  --font-title: 'Noto Sans', 'Outfit', sans-serif;
   --transition-smooth: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   --card-radius: 12px;
   --glass-bg: rgba(10, 10, 10, 0.65);
@@ -103,7 +103,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 50%, #121212 0%, var(--bg-primary) 70%);
+  background: #000000; /* Pure black background like Prime Video */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -327,16 +327,15 @@ body {
   to { opacity: 1; }
 }
 
-/* Sticky Header */
 .main-header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 130px;
+  height: 80px; /* Reduced from 130px */
   padding: 0 5%;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   background: linear-gradient(to bottom, rgba(5, 5, 5, 0.95) 80%, rgba(5, 5, 5, 0));
   backdrop-filter: blur(10px);
@@ -348,7 +347,7 @@ body {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: flex-start;
 }
 
 .hamburger-menu-btn {
@@ -379,11 +378,12 @@ body {
 }
 
 .header-logo {
-  height: 35px;
+  height: 45px;
   cursor: pointer;
   transition: transform 0.3s ease;
   display: flex;
   align-items: center;
+  justify-self: center;
 }
 
 .header-logo:hover {
@@ -397,7 +397,7 @@ body {
 
 .nav-menu {
   position: fixed;
-  bottom: 24px;
+  bottom: 24px; /* Floating capsule at bottom for desktop */
   left: 50%;
   transform: translateX(-50%);
   background: rgba(10, 10, 10, 0.75);
@@ -489,37 +489,71 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 25px;
+  justify-content: flex-end;
+  gap: 20px;
 }
 
-/* Glassmorphism Search Box */
-.search-box {
-  position: relative;
-  width: 280px;
+/* Sleek Expandable Search Bar */
+.search-container {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 6px 15px;
+  position: relative;
   transition: var(--transition-smooth);
 }
 
-.search-box:focus-within {
-  width: 320px;
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--accent-color);
-  box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
-}
-
-.search-icon {
-  width: 16px;
-  height: 16px;
+.search-toggle-btn {
+  background: none;
+  border: none;
   color: var(--text-secondary);
-  margin-right: 10px;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+  border-radius: 50%;
 }
 
-.search-box input {
+.search-toggle-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  transform: scale(1.05);
+}
+
+.search-icon-svg {
+  width: 20px;
+  height: 20px;
+}
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 240px;
+  max-width: 240px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 6px 12px;
+  margin-left: 5px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s ease, 
+              visibility 0.3s;
+  opacity: 1;
+  visibility: visible;
+  overflow: hidden;
+}
+
+.search-input-wrapper.collapsed {
+  width: 0;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  opacity: 0;
+  visibility: hidden;
+  margin-left: 0;
+}
+
+.search-input-wrapper input {
   width: 100%;
   background: none;
   border: none;
@@ -528,7 +562,7 @@ body {
   font-size: 14px;
 }
 
-.search-box input::placeholder {
+.search-input-wrapper input::placeholder {
   color: var(--text-muted);
 }
 
@@ -563,15 +597,21 @@ body {
 .profile-avatar {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ff007f, #ff4081);
+  border-radius: 50%; /* Circular avatar icon like Amazon Prime */
   display: flex;
   justify-content: center;
   align-items: center;
-  font-weight: 700;
+  font-size: 18px;
   color: var(--text-primary);
-  font-family: var(--font-title);
-  box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .profile-info {
@@ -601,12 +641,12 @@ body {
   position: absolute;
   top: 50px;
   right: 0;
-  width: 200px;
-  background: var(--bg-secondary);
+  width: 230px; /* Standard dropdown width */
+  background: #0f171e; /* Solid dark blue-black background */
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  border-radius: 8px; /* Smooth corners */
+  padding: 12px 0; /* Vertical padding only */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
   display: none;
   flex-direction: column;
   z-index: 120;
@@ -649,7 +689,48 @@ body {
 .dropdown-divider {
   border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  margin: 8px 0;
+  margin: 4px 0;
+}
+
+/* Dropdown Sections & Links (Prime Style) */
+.dropdown-section {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.dropdown-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8197a4;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 6px 16px;
+}
+
+.dropdown-item-link {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  padding: 8px 16px;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  display: block;
+  text-decoration: none;
+}
+
+.dropdown-item-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dropdown-item-link.logout:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ff4d4d;
 }
 
 .dropdown-item {
@@ -690,7 +771,7 @@ body {
 
 .main-content {
   flex: 1;
-  padding-top: 150px; /* offset for header */
+  padding-top: 100px; /* Offset for desktop header */
   padding-bottom: 120px;
   width: 100%;
   max-width: 1440px;
@@ -1610,18 +1691,64 @@ body {
   .main-header {
     height: 70px;
     padding: 0 4%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+  .main-content {
+    padding-top: 90px; /* Shift content up to only offset header on mobile */
+    padding-bottom: 90px; /* Add bottom padding so content doesn't get covered by bottom nav menu */
   }
   .header-logo {
     height: 25px;
   }
   .nav-menu {
-    display: none; /* hidden on small mobile screens */
+    display: flex !important;
+    position: fixed;
+    bottom: 0 !important;
+    top: auto !important;
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    height: 65px !important;
+    background: #0c111b !important; /* Disney+ Hotstar solid dark background */
+    border: none !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 0 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5) !important;
+    z-index: 1000;
   }
-  .search-box {
-    width: 180px;
+  .nav-link {
+    flex: 1;
+    height: 100%;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px !important;
+    color: #8f98a6 !important;
+    background: none !important;
+    border: none !important;
   }
-  .search-box:focus-within {
-    width: 200px;
+  .nav-link.active {
+    color: #ffffff !important;
+  }
+  .nav-link .nav-icon {
+    width: 22px !important;
+    height: 22px !important;
+    margin-bottom: 2px;
+    stroke: #8f98a6 !important;
+  }
+  .nav-link.active .nav-icon {
+    stroke: #ffffff !important;
+  }
+  .search-input-wrapper {
+    width: 160px;
+    max-width: 160px;
   }
   .profile-info {
     display: none; /* keep avatar only */
@@ -1671,11 +1798,9 @@ body {
   .welcome-card h2 {
     font-size: 22px;
   }
-  .search-box {
-    width: 130px;
-  }
-  .search-box:focus-within {
-    width: 150px;
+  .search-input-wrapper {
+    width: 110px;
+    max-width: 110px;
   }
   .media-card.landscape {
     width: 220px;
@@ -1685,5 +1810,342 @@ body {
   }
   .similar-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   PROFILE SELECTION SCREEN (AMAZON PRIME STYLE)
+   ========================================================================== */
+
+.profile-selection-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 90%;
+  padding: 40px 10px;
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.profile-selection-title {
+  font-family: var(--font-title);
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.profile-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 35px;
+  margin-bottom: 50px;
+  width: 100%;
+}
+
+.profile-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  width: 120px;
+}
+
+.profile-avatar-card {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%; /* CIRCULAR */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 52px;
+  color: #fff;
+  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+              box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+              border-color 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 3px solid transparent;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.5);
+}
+
+.profile-item:hover .profile-avatar-card {
+  transform: scale(1.05);
+  border-color: #ffffff;
+  box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2);
+}
+
+.profile-avatar-card span {
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));
+  transition: transform 0.3s ease;
+}
+
+.profile-item:hover .profile-avatar-card span {
+  transform: scale(1.1);
+}
+
+.profile-name-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: var(--transition-smooth);
+}
+
+.profile-item:hover .profile-name-text {
+  color: var(--text-primary);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Add Profile Special Card */
+.profile-avatar-card.add-card {
+  background: #1a242f; /* Gray background circle like Prime screenshot */
+  border: none;
+  color: #8197a4;
+  font-size: 44px;
+  box-shadow: none;
+}
+
+.profile-item:hover .profile-avatar-card.add-card {
+  background: #252e39;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Profile Form styling */
+.profile-form-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.5);
+  text-align: center;
+  animation: fadeInUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.profile-form-card h2 {
+  font-family: var(--font-title);
+  font-size: 26px;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.form-avatar-preview {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%; /* CIRCULAR PREVIEW */
+  margin: 0 auto 25px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-family: var(--font-title);
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.profile-quick-switch-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.profile-quick-switch-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.quick-switch-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%; /* CIRCULAR */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.dropdown-quick-switch-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8197a4;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding-left: 16px;
+}
+
+/* Add new dropdown button and plus icon styling */
+.add-new-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  width: 100%;
+}
+
+.add-new-icon-circle {
+  background: #252e39;
+  width: 26px;
+  height: 26px;
+  border-radius: 50% !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #8197a4;
+  font-weight: 700;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.add-new-dropdown-item:hover .add-new-icon-circle {
+  background: #313c4a;
+  color: #ffffff;
+}
+
+/* Kid Badge style */
+.profile-kid-badge {
+  font-size: 9px;
+  font-weight: 800;
+  background-color: #ffffff;
+  color: #000000;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-top: -6px; /* close to profile name */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Bottom brand smile logo */
+.welcome-bottom-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  width: 100%;
+  animation: fadeIn 1s ease;
+}
+
+/* Wide edit profile button */
+.btn-profile-manage {
+  width: 100%;
+  max-width: 280px;
+  padding: 12px;
+  background-color: #1a242f;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  margin-top: 20px;
+  letter-spacing: 0.5px;
+}
+
+.btn-profile-manage:hover {
+  background-color: #252e39;
+}
+
+/* Chrome-style Loading Overlay */
+.global-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 5, 5, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.global-loader.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 7px solid rgba(255, 255, 255, 0.1); /* Thickened from 4px */
+  border-left-color: #ff007f; /* Matching our hot pink accent */
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loader-text {
+  font-family: var(--font-main);
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.5px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

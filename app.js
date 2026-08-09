@@ -16,7 +16,11 @@ const state = {
   playerVolume: 80,
   playerMuted: false,
   playerInterval: null,
-  currentItem: null
+  currentItem: null,
+  // Profile system
+  profiles: [],
+  activeProfile: null,
+  manageProfilesMode: false
 };
 
 // 2. Media Database
@@ -299,13 +303,23 @@ const mediaData = [
 
 // 3. Initialization & Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if user is already signed in
-  const savedName = localStorage.getItem('bluesky_username');
-  if (savedName) {
-    state.userName = savedName;
-    const welcomeScreen = document.getElementById('welcome-screen');
-    if (welcomeScreen) welcomeScreen.classList.add('hidden');
-    switchToDashboard();
+  // Load profiles database
+  loadProfiles();
+  const activeProfileId = localStorage.getItem('bluesky_active_profile_id');
+  
+  if (activeProfileId) {
+    const profile = state.profiles.find(p => p.id === activeProfileId);
+    if (profile) {
+      state.activeProfile = profile;
+      state.userName = profile.name;
+      const welcomeScreen = document.getElementById('welcome-screen');
+      if (welcomeScreen) welcomeScreen.classList.add('hidden');
+      switchToDashboard();
+    } else {
+      renderEnterNameForm();
+    }
+  } else {
+    renderEnterNameForm();
   }
 
   // Handle splash screen preloader timeout
@@ -338,28 +352,58 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoBtn = document.getElementById('header-logo-btn');
   if (logoBtn) {
     logoBtn.addEventListener('click', () => {
-      resetFilters();
+      showLoader(() => {
+        resetFilters();
+      }, 700);
     });
   }
 
-  // Set up navigation tab listeners
+  // Set up navigation tab listeners with Chrome-style loader delay
   const navLinks = document.querySelectorAll('.nav-link');
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
-      navLinks.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-      const category = link.getAttribute('data-category');
-      handleCategoryFilter(category);
+      showLoader(() => {
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        const category = link.getAttribute('data-category');
+        handleCategoryFilter(category);
+      }, 750);
     });
   });
 
-  // Set up dynamic search typing filter
+  // Set up dynamic expandable search typing filter
   const searchInput = document.getElementById('search-input');
   const clearSearchBtn = document.getElementById('clear-search-btn');
+  const searchToggleBtn = document.getElementById('search-toggle-btn');
+  const searchWrapper = document.getElementById('search-input-wrapper');
+  const searchContainer = document.getElementById('search-container');
+
+  if (searchToggleBtn && searchWrapper) {
+    searchToggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isCollapsed = searchWrapper.classList.contains('collapsed');
+      if (isCollapsed) {
+        searchWrapper.classList.remove('collapsed');
+        searchInput.focus();
+      } else {
+        if (!state.searchQuery) {
+          searchWrapper.classList.add('collapsed');
+        }
+      }
+    });
+
+    // Close/collapse search wrapper on click outside
+    document.addEventListener('click', (e) => {
+      if (searchContainer && !searchContainer.contains(e.target) && !state.searchQuery) {
+        searchWrapper.classList.add('collapsed');
+      }
+    });
+  }
+
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
-      state.searchQuery = e.target.value.trim();
-      if (state.searchQuery) {
+      state.searchQuery = e.target.value;
+      if (state.searchQuery.trim()) {
         clearSearchBtn.classList.remove('hidden');
       } else {
         clearSearchBtn.classList.add('hidden');
@@ -370,11 +414,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Clear search trigger
   if (clearSearchBtn) {
-    clearSearchBtn.addEventListener('click', () => {
+    clearSearchBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       searchInput.value = '';
       state.searchQuery = '';
       clearSearchBtn.classList.add('hidden');
       filterContent();
+      searchInput.focus();
     });
   }
 
@@ -398,31 +444,36 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPlayerEvents();
 });
 
-// 4. Welcome Screen Name Submit Handler
-function handleNameSubmit() {
-  const nameInput = document.getElementById('username-input');
-  const name = nameInput.value.trim();
-  if (name.length < 2) return;
-
-  state.userName = name;
-  localStorage.setItem('bluesky_username', name);
-  
-  // Transition styling
-  const welcomeScreen = document.getElementById('welcome-screen');
-  welcomeScreen.classList.add('fade-out');
-  
-  setTimeout(() => {
-    welcomeScreen.classList.add('hidden');
-    switchToDashboard();
-  }, 600);
-}
-
-// Switch view screen
+// 4. Prime-style Dashboard Dashboard Transitions
 function switchToDashboard() {
+  if (!state.activeProfile) {
+    const activeId = localStorage.getItem('bluesky_active_profile_id');
+    const profiles = loadProfiles();
+    state.activeProfile = profiles.find(p => p.id === activeId) || profiles[0];
+    state.userName = state.activeProfile.name;
+  }
+
   // Update names in the UI
-  document.getElementById('user-display-name').textContent = state.userName;
-  document.getElementById('dropdown-display-name').textContent = state.userName;
-  document.getElementById('avatar-initial').textContent = state.userName.charAt(0).toUpperCase();
+  const userDisplayName = document.getElementById('user-display-name');
+  if (userDisplayName) {
+    userDisplayName.textContent = state.activeProfile.name;
+  }
+  const dropdownDisplayName = document.getElementById('dropdown-display-name');
+  if (dropdownDisplayName) {
+    dropdownDisplayName.textContent = state.activeProfile.name;
+  }
+
+  // Update avatar icon in header
+  const profileAvatarBtn = document.getElementById('profile-dropdown-btn');
+  if (profileAvatarBtn) {
+    profileAvatarBtn.style.background = 'none';
+    profileAvatarBtn.style.overflow = 'hidden';
+    profileAvatarBtn.style.border = '1px solid rgba(255,255,255,0.15)';
+    profileAvatarBtn.innerHTML = `<img src="${state.activeProfile.avatarUrl}" alt="Active Avatar" style="width: 100%; height: 100%; object-fit: cover;">`;
+  }
+
+  // Render quick switches
+  renderQuickSwitchList();
 
   // Show dashboard container
   const dashboard = document.getElementById('main-dashboard');
@@ -431,17 +482,6 @@ function switchToDashboard() {
   // Load content
   initCarousel();
   renderDashboardRows();
-}
-
-// Logout & profile adjustments
-function changeName() {
-  localStorage.removeItem('bluesky_username');
-  location.reload();
-}
-
-function logout() {
-  localStorage.removeItem('bluesky_username');
-  location.reload();
 }
 
 // 5. Hero Widescreen Carousel Setup
@@ -473,9 +513,11 @@ function initCarousel() {
             <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;"><path d="M8 5v14l11-7z"></path></svg>
             Play Now
           </button>
-          <button class="btn-watchlist" onclick="toggleWatchlist('${item.id}')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Watchlist
+          <button class="btn-watchlist ${isItemInWatchlist(item.id) ? 'added' : ''}" data-watchlist-id="${item.id}" onclick="toggleWatchlist('${item.id}')">
+            ${isItemInWatchlist(item.id)
+              ? `<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:#22c55e;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Added`
+              : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Watchlist`
+            }
           </button>
         </div>
       </div>
@@ -743,6 +785,10 @@ function resetFilters() {
   if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
   document.getElementById('results-header').classList.add('hidden');
   
+  // Collapse expandable search box
+  const searchWrapper = document.getElementById('search-input-wrapper');
+  if (searchWrapper) searchWrapper.classList.add('collapsed');
+  
   const navLinks = document.querySelectorAll('.nav-link');
   navLinks.forEach(l => l.classList.remove('active'));
   if (navLinks[0]) navLinks[0].classList.add('active');
@@ -761,19 +807,48 @@ function resetFilters() {
 function toggleWatchlist(itemId) {
   const item = mediaData.find(m => m.id === itemId);
   if (!item) return;
-  
-  // Custom watchlist notifications
-  const btn = document.querySelector(`.carousel-slide.active .btn-watchlist`) || 
-              document.querySelector(`.btn-watchlist`);
-  if (btn) {
-    if (btn.classList.contains('added')) {
+
+  if (!state.activeProfile) return;
+  if (!state.activeProfile.watchlist) state.activeProfile.watchlist = [];
+
+  const idx = state.activeProfile.watchlist.indexOf(itemId);
+  let isAdded = false;
+  if (idx === -1) {
+    state.activeProfile.watchlist.push(itemId);
+    isAdded = true;
+  } else {
+    state.activeProfile.watchlist.splice(idx, 1);
+    isAdded = false;
+  }
+
+  // Update profile list in local storage
+  const profiles = loadProfiles();
+  const profileIndex = profiles.findIndex(p => p.id === state.activeProfile.id);
+  if (profileIndex !== -1) {
+    profiles[profileIndex].watchlist = state.activeProfile.watchlist;
+    localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
+    state.profiles = profiles;
+  }
+
+  updateWatchlistButtonsUI(itemId, isAdded);
+}
+
+function updateWatchlistButtonsUI(itemId, isAdded) {
+  const buttons = document.querySelectorAll(`[data-watchlist-id="${itemId}"]`);
+  buttons.forEach(btn => {
+    if (isAdded) {
+      btn.classList.add('added');
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:#22c55e;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Added`;
+    } else {
       btn.classList.remove('added');
       btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Watchlist`;
-    } else {
-      btn.classList.add('added');
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:#22c55e;"><polyline points="20 6 9 17 4 12"></polyline></svg> Added`;
     }
-  }
+  });
+}
+
+function isItemInWatchlist(itemId) {
+  if (!state.activeProfile || !state.activeProfile.watchlist) return false;
+  return state.activeProfile.watchlist.includes(itemId);
 }
 
 // 8. Detailed Modal Handlers
@@ -1052,4 +1127,621 @@ function formatTime(seconds) {
     return `${h}:${mStr.padStart(2, '0')}:${sStr}`;
   }
   return `${m}:${sStr}`;
+}
+
+// ==========================================================================
+// AMAZON PRIME STYLE PROFILE SELECTION AND MANAGEMENT SYSTEM
+// ==========================================================================
+
+// Global Chrome-style Loading helper
+function showLoader(callback, duration = 1000) {
+  const loader = document.getElementById('global-loader');
+  if (!loader) {
+    if (callback) callback();
+    return;
+  }
+  loader.classList.remove('hidden');
+  void loader.offsetWidth; // Trigger reflow for transition
+  loader.classList.add('show');
+
+  setTimeout(() => {
+    if (callback) callback();
+    setTimeout(() => {
+      loader.classList.remove('show');
+      setTimeout(() => {
+        loader.classList.add('hidden');
+      }, 300);
+    }, 200);
+  }, duration);
+}
+
+// Generate the specific BLUE SKY logo from user screenshot
+function generateBrandLogoSVG() {
+  return `<svg viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" style="width: 170px; height: auto;">
+    <!-- BLUE (Outlined Text) -->
+    <text x="10" y="80" font-family="'Inter', sans-serif" font-weight="900" font-size="70" fill="none" stroke="#ffffff" stroke-width="2.5" letter-spacing="2">BLU</text>
+    <!-- E in BLUE (Three horizontal bars) -->
+    <g fill="#ffffff">
+      <rect x="182" y="32" width="40" height="9" rx="1.5" />
+      <rect x="182" y="51" width="34" height="9" rx="1.5" />
+      <rect x="182" y="70" width="40" height="9" rx="1.5" />
+    </g>
+    <!-- SKY (Solid Hot Pink Text) -->
+    <text x="238" y="80" font-family="'Inter', sans-serif" font-weight="900" font-size="70" fill="#e90064" letter-spacing="2">SKY</text>
+  </svg>`;
+}
+
+// 1. Enter Your Name Page (First Entry Page)
+function renderEnterNameForm() {
+  const container = document.getElementById('welcome-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="profile-form-card" style="max-width: 400px; padding: 40px 30px;">
+      <div style="display: flex; justify-content: center; margin-bottom: 25px;">
+        ${generateBrandLogoSVG()}
+      </div>
+      <h2 style="margin-bottom: 20px; font-size: 24px; font-weight: 700; font-family: var(--font-title);">Enter your name</h2>
+      <form onsubmit="event.preventDefault(); handleNameSubmit();">
+        <div class="input-group" style="margin-bottom: 25px;">
+          <input type="text" id="user-entry-name" autocomplete="off" placeholder=" " required minlength="2" maxlength="15">
+          <label for="user-entry-name">Your Name</label>
+          <div class="input-glow"></div>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 15px; letter-spacing: 0.5px; font-family: var(--font-title);">
+          Continue
+        </button>
+      </form>
+    </div>
+  `;
+
+  setTimeout(() => {
+    const input = document.getElementById('user-entry-name');
+    if (input) input.focus();
+  }, 100);
+}
+
+function handleNameSubmit() {
+  const nameInput = document.getElementById('user-entry-name');
+  const name = nameInput.value.trim();
+  if (name.length < 2) return;
+
+  // Transition with a Chrome-style loader spinner
+  showLoader(() => {
+    const profiles = loadProfiles();
+    // Check if profile with this name already exists
+    let existingProfile = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
+    if (!existingProfile) {
+      // Create new profile with this name
+      const avatarData = getUnusedAvatar(profiles, false);
+      existingProfile = {
+        id: 'p_' + Date.now(),
+        name: name,
+        avatarTemplateId: avatarData.avatarTemplateId,
+        avatarUrl: avatarData.imageUrl,
+        isKids: false,
+        watchlist: []
+      };
+      profiles.push(existingProfile);
+      localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
+      state.profiles = profiles;
+    }
+    
+    // Transition directly to the "Who's watching?" selection screen
+    showProfileSelector();
+  }, 1000);
+}
+
+function generateBlueAvatarBase64() {
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bgBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#5fa5d9" />
+        <stop offset="100%" stop-color="#175d9e" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="50" fill="url(#bgBlue)" />
+    <circle cx="50" cy="36" r="16" fill="#e1f0fa" />
+    <path d="M 22,76 C 22,62 32,56 50,56 C 68,56 78,62 78,76 L 78,85 L 22,85 Z" fill="#e1f0fa" />
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+// Chubby star cartoon face (default Kids avatar)
+function generateKidsAvatarBase64() {
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bgGold" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#f9b716" />
+        <stop offset="100%" stop-color="#d47900" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="50" fill="url(#bgGold)" />
+    <path d="M 50,20 C 53,28 58,35 68,36 C 78,37 83,44 79,52 C 75,60 72,66 76,76 C 80,86 70,90 60,84 C 50,78 50,78 40,84 C 30,90 20,86 24,76 C 28,66 25,60 21,52 C 17,44 22,37 32,36 C 42,35 47,28 50,20 Z" fill="#ffe28a" />
+    <circle cx="41" cy="48" r="4.5" fill="#442a08" />
+    <circle cx="59" cy="48" r="4.5" fill="#442a08" />
+    <ellipse cx="50" cy="57" rx="7" ry="5.5" fill="#442a08" />
+    <circle cx="50" cy="55" r="2" fill="#ffe28a" />
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+function generateRedAvatarBase64() {
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bgRed" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#e65e53" />
+        <stop offset="100%" stop-color="#a8251e" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="50" fill="url(#bgRed)" />
+    <circle cx="50" cy="36" r="16" fill="#fceae8" />
+    <path d="M 22,76 C 22,62 32,56 50,56 C 68,56 78,62 78,76 L 78,85 L 22,85 Z" fill="#fceae8" />
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+function generateGreenAvatarBase64() {
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bgGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#5ec686" />
+        <stop offset="100%" stop-color="#1e7845" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="50" fill="url(#bgGreen)" />
+    <circle cx="50" cy="36" r="16" fill="#ebf7ef" />
+    <path d="M 22,76 C 22,62 32,56 50,56 C 68,56 78,62 78,76 L 78,85 L 22,85 Z" fill="#ebf7ef" />
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+function generatePurpleAvatarBase64() {
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bgPurple" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#b06ad9" />
+        <stop offset="100%" stop-color="#63278f" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="50" fill="url(#bgPurple)" />
+    <circle cx="50" cy="36" r="16" fill="#f6eefa" />
+    <path d="M 22,76 C 22,62 32,56 50,56 C 68,56 78,62 78,76 L 78,85 L 22,85 Z" fill="#f6eefa" />
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+function generateOrangeAvatarBase64() {
+  const svg = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bgOrange" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#f78f52" />
+        <stop offset="100%" stop-color="#c45110" />
+      </linearGradient>
+    </defs>
+    <circle cx="50" cy="50" r="50" fill="url(#bgOrange)" />
+    <circle cx="50" cy="36" r="16" fill="#fef2eb" />
+    <path d="M 22,76 C 22,62 32,56 50,56 C 68,56 78,62 78,76 L 78,85 L 22,85 Z" fill="#fef2eb" />
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+const AVATAR_TEMPLATES = [
+  { id: 'av_1', getUrl: generateBlueAvatarBase64, isKids: false },
+  { id: 'av_2', getUrl: generateKidsAvatarBase64, isKids: true },
+  { id: 'av_3', getUrl: generateRedAvatarBase64, isKids: false },
+  { id: 'av_4', getUrl: generateGreenAvatarBase64, isKids: false },
+  { id: 'av_5', getUrl: generatePurpleAvatarBase64, isKids: false },
+  { id: 'av_6', getUrl: generateOrangeAvatarBase64, isKids: false }
+];
+
+function loadProfiles() {
+  let profiles = JSON.parse(localStorage.getItem('bluesky_profiles'));
+  if (!profiles || profiles.length === 0) {
+    // Seed default profiles matching user screenshots
+    profiles = [
+      { id: 'p_1', name: 'Ashish', avatarTemplateId: 'av_1', avatarUrl: generateBlueAvatarBase64(), isKids: false, watchlist: [] },
+      { id: 'p_2', name: 'Kids', avatarTemplateId: 'av_2', avatarUrl: generateKidsAvatarBase64(), isKids: true, watchlist: [] }
+    ];
+    localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
+  }
+  state.profiles = profiles;
+  return profiles;
+}
+
+function getUnusedAvatar(existingProfiles, isKidsSelected = false) {
+  if (isKidsSelected) {
+    return { avatarTemplateId: 'av_2', imageUrl: generateKidsAvatarBase64(), isKids: true };
+  }
+  const usedAvatarIds = existingProfiles.map(p => p.avatarTemplateId);
+  // Find first unused silhouette avatar (skip av_2 since it is for Kids)
+  const availableTemplate = AVATAR_TEMPLATES.find(t => t.id !== 'av_2' && !usedAvatarIds.includes(t.id));
+  if (availableTemplate) {
+    return { avatarTemplateId: availableTemplate.id, imageUrl: availableTemplate.getUrl(), isKids: false };
+  }
+  
+  // Cycle non-kids templates if limit exceeded
+  const idx = (existingProfiles.filter(p => !p.isKids).length) % 5;
+  const templates = AVATAR_TEMPLATES.filter(t => t.id !== 'av_2');
+  const template = templates[idx];
+  return {
+    avatarTemplateId: `custom_${Date.now()}_${idx}`,
+    imageUrl: template.getUrl(),
+    isKids: false
+  };
+}
+
+function renderProfileSelection() {
+  const container = document.getElementById('welcome-container');
+  if (!container) return;
+
+  const profiles = loadProfiles();
+  
+  let gridHTML = '';
+  profiles.forEach(profile => {
+    gridHTML += `
+      <div class="profile-item" onclick="handleProfileClick('${profile.id}')">
+        <div class="profile-avatar-card">
+          <img src="${profile.avatarUrl}" alt="${profile.name}" style="width: 100%; height: 100%; object-fit: cover;">
+          ${state.manageProfilesMode ? `
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; border-radius: 50%;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 32px; height: 32px; color: #fff;">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+            </div>
+          ` : ''}
+        </div>
+        <span class="profile-name-text">${profile.name}</span>
+        ${profile.isKids ? `<span class="profile-kid-badge">KID</span>` : ''}
+      </div>
+    `;
+  });
+
+  if (profiles.length < 8 && !state.manageProfilesMode) {
+    gridHTML += `
+      <div class="profile-item" onclick="renderAddProfileForm()">
+        <div class="profile-avatar-card add-card">
+          <span>+</span>
+        </div>
+        <span class="profile-name-text">Add new</span>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="profile-selection-container">
+      <h1 class="profile-selection-title">${state.manageProfilesMode ? 'Edit Profiles' : "Who's watching?"}</h1>
+      <div class="profile-grid">
+        ${gridHTML}
+      </div>
+      <button class="btn-profile-manage" onclick="toggleManageProfilesMode()">
+        ${state.manageProfilesMode ? 'Done' : 'Edit profile'}
+      </button>
+      <div class="welcome-bottom-logo">
+        ${generateBrandLogoSVG()}
+      </div>
+    </div>
+  `;
+}
+
+function toggleManageProfilesMode() {
+  state.manageProfilesMode = !state.manageProfilesMode;
+  renderProfileSelection();
+}
+
+function handleProfileClick(profileId) {
+  if (state.manageProfilesMode) {
+    renderEditProfileForm(profileId);
+  } else {
+    selectProfile(profileId);
+  }
+}
+
+// Transition helper for selecting profiles
+function selectProfile(profileId) {
+  const profiles = loadProfiles();
+  const profile = profiles.find(p => p.id === profileId);
+  if (!profile) return;
+
+  // Safe chrome loading transition
+  showLoader(() => {
+    state.activeProfile = profile;
+    state.userName = profile.name;
+    localStorage.setItem('bluesky_active_profile_id', profile.id);
+    localStorage.setItem('bluesky_username', profile.name);
+
+    // Hide selection screen and swap dashboard visibility
+    const welcomeScreen = document.getElementById('welcome-screen');
+    if (welcomeScreen) welcomeScreen.classList.add('hidden');
+    switchToDashboard();
+  }, 1100);
+}
+
+function renderAddProfileForm() {
+  const container = document.getElementById('welcome-container');
+  if (!container) return;
+
+  const profiles = loadProfiles();
+  const nextAvatar = getUnusedAvatar(profiles, false);
+
+  container.innerHTML = `
+    <div class="profile-form-card">
+      <h2 style="margin-bottom: 25px;">Create Profile</h2>
+      <div class="form-avatar-preview" id="form-avatar-preview-box" style="background: none; overflow: hidden; border: 2px solid rgba(255,255,255,0.2);">
+        <img id="form-avatar-preview-img" src="${nextAvatar.imageUrl}" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <form onsubmit="event.preventDefault(); saveNewProfile();">
+        <div class="input-group">
+          <input type="text" id="new-profile-name" autocomplete="off" placeholder=" " required minlength="2" maxlength="15">
+          <label for="new-profile-name">Profile Name</label>
+          <div class="input-glow"></div>
+        </div>
+        
+        <div class="kids-toggle-container" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0 10px 0;">
+          <input type="checkbox" id="profile-is-kids" style="width: 18px; height: 18px; cursor: pointer;" onchange="handleKidsCheckboxChange(this.checked)">
+          <label for="profile-is-kids" style="font-size: 14px; color: var(--text-secondary); cursor: pointer; font-weight: 500;">Kids Profile?</label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="cancelProfileForm()">Cancel</button>
+          <button type="submit" class="btn-primary" style="flex: 1; padding: 15px; border-radius: 12px; font-weight: 600; font-size: 15px;">Save Profile</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  // Global helper for checkbox changes inside the form
+  window.handleKidsCheckboxChange = function(checked) {
+    const previewImg = document.getElementById('form-avatar-preview-img');
+    if (checked) {
+      previewImg.src = generateKidsAvatarBase64();
+    } else {
+      const defaultUnused = getUnusedAvatar(profiles, false);
+      previewImg.src = defaultUnused.imageUrl;
+    }
+  };
+
+  setTimeout(() => {
+    const input = document.getElementById('new-profile-name');
+    if (input) input.focus();
+  }, 100);
+}
+
+function renderEditProfileForm(profileId) {
+  const container = document.getElementById('welcome-container');
+  if (!container) return;
+
+  const profiles = loadProfiles();
+  const profile = profiles.find(p => p.id === profileId);
+  if (!profile) return;
+
+  container.innerHTML = `
+    <div class="profile-form-card">
+      <h2 style="margin-bottom: 25px;">Edit Profile</h2>
+      <div class="form-avatar-preview" id="form-avatar-preview-box" style="background: none; overflow: hidden; border: 2px solid rgba(255,255,255,0.2);">
+        <img id="form-avatar-preview-img" src="${profile.avatarUrl}" alt="Avatar Preview" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <form onsubmit="event.preventDefault(); updateProfile('${profile.id}');">
+        <div class="input-group">
+          <input type="text" id="edit-profile-name" autocomplete="off" placeholder=" " required minlength="2" maxlength="15" value="${profile.name}">
+          <label for="edit-profile-name">Profile Name</label>
+          <div class="input-glow"></div>
+        </div>
+
+        <div class="kids-toggle-container" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0 10px 0;">
+          <input type="checkbox" id="profile-is-kids" style="width: 18px; height: 18px; cursor: pointer;" ${profile.isKids ? 'checked' : ''} onchange="handleEditKidsCheckboxChange(this.checked)">
+          <label for="profile-is-kids" style="font-size: 14px; color: var(--text-secondary); cursor: pointer; font-weight: 500;">Kids Profile?</label>
+        </div>
+
+        <div class="form-actions" style="flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 15px; width: 100%;">
+            <button type="button" class="btn-secondary" onclick="cancelProfileForm()">Cancel</button>
+            <button type="submit" class="btn-primary" style="flex: 1; padding: 15px; border-radius: 12px; font-weight: 600; font-size: 15px;">Save</button>
+          </div>
+          ${profiles.length > 1 ? `
+            <button type="button" class="btn-secondary" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--danger); border-radius: 12px; padding: 12px;" onclick="deleteProfile('${profile.id}')">
+              Delete Profile
+            </button>
+          ` : ''}
+        </div>
+      </form>
+    </div>
+  `;
+
+  // Global helper for edit form checkbox changes
+  window.handleEditKidsCheckboxChange = function(checked) {
+    const previewImg = document.getElementById('form-avatar-preview-img');
+    if (checked) {
+      previewImg.src = generateKidsAvatarBase64();
+    } else {
+      if (profile.avatarTemplateId === 'av_2') {
+        const defaultUnused = getUnusedAvatar(profiles.filter(p => p.id !== profileId), false);
+        previewImg.src = defaultUnused.imageUrl;
+      } else {
+        previewImg.src = profile.avatarUrl;
+      }
+    }
+  };
+
+  setTimeout(() => {
+    const input = document.getElementById('edit-profile-name');
+    if (input) input.focus();
+  }, 100);
+}
+
+function saveNewProfile() {
+  const nameInput = document.getElementById('new-profile-name');
+  const name = nameInput.value.trim();
+  if (name.length < 2) return;
+
+  const isKidsChecked = document.getElementById('profile-is-kids').checked;
+  const profiles = loadProfiles();
+  const avatarData = getUnusedAvatar(profiles, isKidsChecked);
+
+  const newProfile = {
+    id: 'p_' + Date.now(),
+    name: name,
+    avatarTemplateId: avatarData.avatarTemplateId,
+    avatarUrl: avatarData.imageUrl,
+    isKids: isKidsChecked,
+    watchlist: []
+  };
+
+  profiles.push(newProfile);
+  localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
+  state.profiles = profiles;
+  
+  cancelProfileForm();
+}
+
+function updateProfile(profileId) {
+  const nameInput = document.getElementById('edit-profile-name');
+  const name = nameInput.value.trim();
+  if (name.length < 2) return;
+
+  const isKidsChecked = document.getElementById('profile-is-kids').checked;
+  const profiles = loadProfiles();
+  const profileIndex = profiles.findIndex(p => p.id === profileId);
+  
+  if (profileIndex !== -1) {
+    const oldProfile = profiles[profileIndex];
+    let newAvatarUrl = oldProfile.avatarUrl;
+    let newTemplateId = oldProfile.avatarTemplateId;
+
+    // If toggle kids changed, auto-update avatar accordingly
+    if (isKidsChecked && !oldProfile.isKids) {
+      newTemplateId = 'av_2';
+      newAvatarUrl = generateKidsAvatarBase64();
+    } else if (!isKidsChecked && oldProfile.isKids) {
+      const defaultUnused = getUnusedAvatar(profiles.filter(p => p.id !== profileId), false);
+      newTemplateId = defaultUnused.avatarTemplateId;
+      newAvatarUrl = defaultUnused.imageUrl;
+    }
+
+    profiles[profileIndex].name = name;
+    profiles[profileIndex].isKids = isKidsChecked;
+    profiles[profileIndex].avatarTemplateId = newTemplateId;
+    profiles[profileIndex].avatarUrl = newAvatarUrl;
+    
+    localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
+    state.profiles = profiles;
+  }
+
+  cancelProfileForm();
+}
+
+function deleteProfile(profileId) {
+  if (confirm('Are you sure you want to delete this profile? All its data will be lost.')) {
+    let profiles = loadProfiles();
+    profiles = profiles.filter(p => p.id !== profileId);
+    localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
+    state.profiles = profiles;
+    
+    const activeId = localStorage.getItem('bluesky_active_profile_id');
+    if (activeId === profileId) {
+      localStorage.removeItem('bluesky_active_profile_id');
+    }
+    
+    cancelProfileForm();
+  }
+}
+
+function cancelProfileForm() {
+  state.manageProfilesMode = false;
+  renderProfileSelection();
+}
+
+function renderQuickSwitchList() {
+  const switchContainer = document.getElementById('other-profiles-list');
+  if (!switchContainer) return;
+
+  switchContainer.innerHTML = '';
+  const profiles = loadProfiles();
+  const otherProfiles = profiles.filter(p => p.id !== state.activeProfile.id);
+
+  if (otherProfiles.length === 0) {
+    switchContainer.innerHTML = '<p style="font-size:11px;color:#8197a4;padding-left:16px;margin:5px 0;">No other profiles</p>';
+    return;
+  }
+
+  const title = document.createElement('p');
+  title.className = 'dropdown-quick-switch-title';
+  title.textContent = 'Switch Profile';
+  switchContainer.appendChild(title);
+
+  otherProfiles.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'profile-quick-switch-item';
+    btn.innerHTML = `
+      <div class="quick-switch-avatar" style="background: none; overflow: hidden;">
+        <img src="${p.avatarUrl}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <span>${p.name}</span>
+    `;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Transition switch
+      showLoader(() => {
+        state.activeProfile = p;
+        state.userName = p.name;
+        localStorage.setItem('bluesky_active_profile_id', p.id);
+        localStorage.setItem('bluesky_username', p.name);
+        
+        const dropdownMenu = document.getElementById('profile-dropdown-menu');
+        if (dropdownMenu) dropdownMenu.classList.remove('show');
+        
+        switchToDashboard();
+      }, 1000);
+    });
+    switchContainer.appendChild(btn);
+  });
+}
+
+function showProfileSelector() {
+  // Safe transition to switcher
+  showLoader(() => {
+    document.getElementById('main-dashboard').classList.add('hidden');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    welcomeScreen.classList.remove('hidden');
+    welcomeScreen.classList.remove('fade-out');
+    localStorage.removeItem('bluesky_active_profile_id');
+    renderProfileSelection();
+  }, 900);
+}
+
+function showAddProfileForm() {
+  showLoader(() => {
+    document.getElementById('main-dashboard').classList.add('hidden');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    welcomeScreen.classList.remove('hidden');
+    welcomeScreen.classList.remove('fade-out');
+    renderAddProfileForm();
+  }, 900);
+}
+
+// 5. Sign Out Active Profile (returns directly to Enter name form with loader)
+function signOutActiveProfile() {
+  showLoader(() => {
+    localStorage.removeItem('bluesky_active_profile_id');
+    localStorage.removeItem('bluesky_username');
+    state.activeProfile = null;
+    state.userName = '';
+    
+    // Toggle active classes and display name form
+    document.getElementById('main-dashboard').classList.add('hidden');
+    const welcomeScreen = document.getElementById('welcome-screen');
+    if (welcomeScreen) {
+      welcomeScreen.classList.remove('hidden');
+      welcomeScreen.classList.remove('fade-out');
+    }
+    renderEnterNameForm();
+  }, 1100);
+}
+
+function clearAllProfiles() {
+  localStorage.removeItem('bluesky_profiles');
+  localStorage.removeItem('bluesky_active_profile_id');
+  localStorage.removeItem('bluesky_username');
+  location.reload();
 }
