@@ -1910,6 +1910,22 @@ function setupSearchOverlayEvents() {
     });
   });
   
+  // Mic voice assistant triggers
+  const micBtn = document.querySelector('.search-mic-btn');
+  if (micBtn) {
+    micBtn.addEventListener('click', startVoiceSearch);
+  }
+  
+  const voiceCancelBtn = document.getElementById('voice-cancel-btn');
+  if (voiceCancelBtn) {
+    voiceCancelBtn.addEventListener('click', () => {
+      if (recognition) {
+        recognition.stop();
+      }
+      showVoiceOverlay(false);
+    });
+  }
+
   // Close on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1987,4 +2003,94 @@ function renderSearchOverlayResults(query) {
     });
     grid.appendChild(card);
   });
+}
+
+let recognition = null;
+
+function setupSpeechRecognition() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    console.warn("Speech Recognition API not supported in this browser.");
+    return;
+  }
+  
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.lang = 'en-US'; // Also supports general speech capture
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  
+  recognition.onstart = () => {
+    showVoiceOverlay(true, "Listening...");
+  };
+  
+  recognition.onspeechend = () => {
+    showVoiceOverlay(true, "Processing...");
+    recognition.stop();
+  };
+  
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    handleVoiceInputResult(transcript);
+  };
+  
+  recognition.onerror = (event) => {
+    console.error("Speech recognition error:", event.error);
+    let errorMsg = "Sorry, couldn't hear that.";
+    if (event.error === 'not-allowed') {
+      errorMsg = "Microphone permission denied.";
+    }
+    showVoiceOverlay(true, errorMsg);
+    setTimeout(() => showVoiceOverlay(false), 2000);
+  };
+  
+  recognition.onend = () => {
+    const statusText = document.querySelector('.voice-status-text');
+    if (statusText && (statusText.textContent === "Listening..." || statusText.textContent === "Processing...")) {
+      showVoiceOverlay(false);
+    }
+  };
+}
+
+function startVoiceSearch() {
+  if (!recognition) {
+    setupSpeechRecognition();
+  }
+  
+  if (!recognition) {
+    alert("Speech recognition is not supported in your browser. Please try Chrome or Safari.");
+    return;
+  }
+  
+  try {
+    recognition.start();
+  } catch (e) {
+    console.error("Speech recognition start failed:", e);
+  }
+}
+
+function handleVoiceInputResult(transcript) {
+  const input = document.getElementById('overlay-search-input');
+  const clearBtn = document.getElementById('overlay-clear-search-btn');
+  if (input) {
+    input.value = transcript;
+    if (clearBtn) {
+      clearBtn.classList.remove('hidden');
+    }
+    renderSearchOverlayResults(transcript);
+  }
+  showVoiceOverlay(false);
+}
+
+function showVoiceOverlay(show, status = "Listening...") {
+  const voiceOverlay = document.getElementById('voice-overlay');
+  const statusText = document.querySelector('.voice-status-text');
+  if (!voiceOverlay) return;
+  
+  if (show) {
+    if (statusText) statusText.textContent = status;
+    voiceOverlay.classList.remove('hidden');
+  } else {
+    voiceOverlay.classList.add('hidden');
+  }
 }
