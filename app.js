@@ -178,6 +178,22 @@ const mediaData = [
 
   // --- TV SHOWS (Portrait Cards) ---
   {
+    id: 'tv_aajtak',
+    type: 'tv',
+    title: 'Aaj Tak',
+    subtitle: 'Live • 24/7 News Channel',
+    description: 'Aaj Tak is a leading Hindi news television channel in India. Watch Aaj Tak Live News Channel for latest news, breaking news, politics, business, and entertainment.',
+    image: 'aaj_tak.png',
+    bannerImage: 'aaj_tak.png',
+    rating: 'LIVE',
+    year: '2026',
+    duration: 'Live Stream',
+    genres: 'News • Live • Hindi',
+    cast: 'Aaj Tak News Team',
+    videoUrl: 'https://vglivessai.akamaized.net/sg/v1/manifest/611d79b11b77e2f571934fd80ca1413453772ac7/da9d350e-ac56-4320-8609-0c501da4fb5b/b31c9b98-2f04-48de-9216-b179a858695e/1.m3u8',
+    isLive: true
+  },
+  {
     id: 'show_1',
     type: 'tv',
     title: 'Shadow Symphony',
@@ -400,109 +416,294 @@ const mediaData = [
 ];
 
 // 3. Initialization & Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-  // Load profiles database
-  loadProfiles();
-  const activeProfileId = localStorage.getItem('bluesky_active_profile_id');
+function initURLRouting() {
+  const params = new URLSearchParams(window.location.search);
+  const category = params.get('category') || 'all';
+  const search = params.get('search') || '';
+
+  // Apply category
+  state.activeTab = category;
   
-  if (activeProfileId) {
-    const profile = state.profiles.find(p => p.id === activeProfileId);
-    if (profile) {
-      state.activeProfile = profile;
-      state.userName = profile.name;
-      const welcomeScreen = document.getElementById('welcome-screen');
-      if (welcomeScreen) welcomeScreen.classList.add('hidden');
-      switchToDashboard();
-    } else {
-      renderProfileSelection();
-    }
-  } else {
-    if (state.profiles && state.profiles.length > 0) {
-      renderProfileSelection();
-    } else {
-      renderEnterNameForm();
-    }
-  }
-
-  // Handle splash screen preloader timeout
-  const splashScreen = document.getElementById('splash-screen');
-  if (splashScreen) {
-    setTimeout(() => {
-      splashScreen.classList.add('fade-out');
-      setTimeout(() => {
-        splashScreen.classList.add('hidden');
-      }, 800); // Match transition duration (0.8s)
-    }, 3000); // Splash screen display duration (3 seconds)
-  }
-  
-  // Set up profile dropdown triggers
-  const profileBtn = document.getElementById('profile-dropdown-btn');
-  const dropdownMenu = document.getElementById('profile-dropdown-menu');
-  if (profileBtn) {
-    profileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdownMenu.classList.toggle('show');
-    });
-  }
-
-  // Close dropdown on outside click
-  document.addEventListener('click', () => {
-    if (dropdownMenu) dropdownMenu.classList.remove('show');
-  });
-
-  // Logo home button click
-  const logoBtn = document.getElementById('header-logo-btn');
-  if (logoBtn) {
-    logoBtn.addEventListener('click', () => {
-      showLoader(() => {
-        resetFilters();
-      }, 700);
-    });
-  }
-
-  // Set up navigation tab listeners with Chrome-style loader delay
+  // Set navigation link active state in UI
   const navLinks = document.querySelectorAll('.nav-link');
   navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      showLoader(() => {
-        navLinks.forEach(l => l.classList.remove('active'));
-        link.classList.add('active');
-        const category = link.getAttribute('data-category');
-        handleCategoryFilter(category);
-      }, 750);
-    });
+    const linkCat = link.getAttribute('data-category');
+    if (linkCat === category) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
   });
 
-  // Set up search overlay triggers
-  const searchToggleBtn = document.getElementById('search-toggle-btn');
-  if (searchToggleBtn) {
-    searchToggleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openSearchOverlay();
-    });
+  // Apply search query
+  if (search) {
+    state.searchQuery = search;
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) searchInput.value = search;
+    const clearBtn = document.getElementById('clear-search-btn');
+    if (clearBtn) clearBtn.classList.remove('hidden');
+    
+    // Perform filtering
+    filterContent();
+  } else {
+    handleCategoryFilter(category);
+  }
+}
+
+function initWatchPage() {
+  // Update header profile display
+  const userDisplayName = document.getElementById('user-display-name');
+  if (userDisplayName) {
+    userDisplayName.textContent = state.activeProfile.name;
   }
   
-  // Set up search overlay interaction events
-  setupSearchOverlayEvents();
-
-  // Reset filter button
-  const resetBtn = document.getElementById('reset-filters-btn');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      resetFilters();
-    });
+  const profileAvatarBtn = document.getElementById('profile-dropdown-btn');
+  if (profileAvatarBtn) {
+    profileAvatarBtn.style.background = 'none';
+    profileAvatarBtn.style.overflow = 'hidden';
+    profileAvatarBtn.style.border = '1px solid rgba(255,255,255,0.15)';
+    profileAvatarBtn.innerHTML = `<img src="${state.activeProfile.avatarUrl}" alt="Active Avatar" style="width: 100%; height: 100%; object-fit: cover;">`;
   }
 
-  // Hero carousel control buttons
-  document.getElementById('carousel-prev-btn').addEventListener('click', () => moveCarousel(-1));
-  document.getElementById('carousel-next-btn').addEventListener('click', () => moveCarousel(1));
+  // Render quick switch dropdown section
+  renderQuickSwitchList();
 
-  // Modal setup
-  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-  document.getElementById('modal-close-backdrop').addEventListener('click', closeModal);
+  // Get item ID
+  const params = new URLSearchParams(window.location.search);
+  const itemId = params.get('id');
+  const item = mediaData.find(m => m.id === itemId);
+  if (!item) {
+    window.location.href = 'index.html';
+    return;
+  }
 
-  // Custom Video Player events
+  state.currentItem = item;
+
+  // Populate metadata details
+  document.getElementById('watch-title').textContent = item.title;
+  document.getElementById('watch-rating').textContent = item.rating;
+  document.getElementById('watch-year').textContent = item.year;
+  document.getElementById('watch-duration').textContent = item.duration;
+  document.getElementById('watch-genres').textContent = item.genres;
+  document.getElementById('watch-description').textContent = item.description;
+  document.getElementById('watch-cast').textContent = item.cast || 'N/A';
+
+  // Set up player background poster
+  const posterBg = document.getElementById('player-poster-bg');
+  if (posterBg) {
+    posterBg.style.backgroundImage = `url('${item.bannerImage || item.image}')`;
+  }
+  
+  const playerTag = document.getElementById('player-tag');
+  if (playerTag) {
+    playerTag.textContent = item.type === 'sports' ? 'Live Sports' : 'Blue Sky Premium';
+  }
+
+  // Setup Watchlist Button
+  const watchlistBtn = document.getElementById('watch-watchlist-btn');
+  if (watchlistBtn) {
+    watchlistBtn.setAttribute('data-watchlist-id', item.id);
+    if (isItemInWatchlist(item.id)) {
+      watchlistBtn.classList.add('added');
+      watchlistBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:#22c55e;"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Added`;
+    } else {
+      watchlistBtn.classList.remove('added');
+      watchlistBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Watchlist`;
+    }
+    
+    watchlistBtn.onclick = () => {
+      toggleWatchlist(item.id);
+    };
+  }
+
+  // Reset player state & volume UI
+  resetPlayerState();
+
+  // Load recommendations
+  renderWatchRecommendations(item);
+
+  // Set up custom player events
   setupPlayerEvents();
+  
+  // Auto-play or show buffering spinner initially
+  playVideo();
+}
+
+function renderWatchRecommendations(currentItem) {
+  const grid = document.getElementById('watch-similar-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  // Get similar items
+  const matches = mediaData.filter(item => item.type === currentItem.type && item.id !== currentItem.id).slice(0, 5);
+
+  matches.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'similar-card';
+    card.innerHTML = `
+      <img src="${item.image}" alt="${item.title}">
+      <div class="similar-overlay">
+        <span class="similar-card-title">${item.title}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => {
+      window.location.href = `watch.html?id=${item.id}`;
+    });
+    grid.appendChild(card);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const isWatchPage = window.location.pathname.includes('watch.html');
+
+  if (isWatchPage) {
+    // Load profiles database
+    loadProfiles();
+    const activeProfileId = localStorage.getItem('bluesky_active_profile_id');
+    if (activeProfileId) {
+      const profile = state.profiles.find(p => p.id === activeProfileId);
+      if (profile) {
+        state.activeProfile = profile;
+        state.userName = profile.name;
+        initWatchPage();
+      } else {
+        window.location.href = 'index.html';
+      }
+    } else {
+      window.location.href = 'index.html';
+    }
+
+    // Set up profile dropdown triggers
+    const profileBtn = document.getElementById('profile-dropdown-btn');
+    const dropdownMenu = document.getElementById('profile-dropdown-menu');
+    if (profileBtn) {
+      profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+      });
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', () => {
+      if (dropdownMenu) dropdownMenu.classList.remove('show');
+    });
+
+    // Logo home button click
+    const logoBtn = document.getElementById('header-logo-btn');
+    if (logoBtn) {
+      logoBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+    }
+  } else {
+    // Load profiles database
+    loadProfiles();
+    const activeProfileId = localStorage.getItem('bluesky_active_profile_id');
+    const params = new URLSearchParams(window.location.search);
+    
+    if (activeProfileId) {
+      const profile = state.profiles.find(p => p.id === activeProfileId);
+      if (profile) {
+        state.activeProfile = profile;
+        state.userName = profile.name;
+        const welcomeScreen = document.getElementById('welcome-screen');
+        if (welcomeScreen) welcomeScreen.classList.add('hidden');
+        switchToDashboard();
+      } else {
+        renderProfileSelection();
+      }
+    } else {
+      if (params.get('addProfile') === 'true') {
+        renderAddProfileForm();
+      } else if (state.profiles && state.profiles.length > 0) {
+        renderProfileSelection();
+      } else {
+        renderEnterNameForm();
+      }
+    }
+
+    // Handle splash screen preloader timeout
+    const splashScreen = document.getElementById('splash-screen');
+    if (splashScreen) {
+      const splashShown = sessionStorage.getItem('bluesky_splash_shown');
+      if (splashShown) {
+        splashScreen.style.display = 'none';
+        splashScreen.classList.add('hidden');
+      } else {
+        sessionStorage.setItem('bluesky_splash_shown', 'true');
+        setTimeout(() => {
+          splashScreen.classList.add('fade-out');
+          setTimeout(() => {
+            splashScreen.classList.add('hidden');
+          }, 800); // Match transition duration (0.8s)
+        }, 3000); // Splash screen display duration (3 seconds)
+      }
+    }
+    
+    // Set up profile dropdown triggers
+    const profileBtn = document.getElementById('profile-dropdown-btn');
+    const dropdownMenu = document.getElementById('profile-dropdown-menu');
+    if (profileBtn) {
+      profileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+      });
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', () => {
+      if (dropdownMenu) dropdownMenu.classList.remove('show');
+    });
+
+    // Logo home button click
+    const logoBtn = document.getElementById('header-logo-btn');
+    if (logoBtn) {
+      logoBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+    }
+
+    // Set up navigation tab listeners with native reloads
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const category = link.getAttribute('data-category');
+        window.location.href = `index.html?category=${category}`;
+      });
+    });
+
+    // Set up search overlay triggers
+    const searchToggleBtn = document.getElementById('search-toggle-btn');
+    if (searchToggleBtn) {
+      searchToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openSearchOverlay();
+      });
+    }
+    
+    // Set up search overlay interaction events
+    setupSearchOverlayEvents();
+
+    // Reset filter button
+    const resetBtn = document.getElementById('reset-filters-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+    }
+
+    // Hero carousel control buttons
+    document.getElementById('carousel-prev-btn').addEventListener('click', () => moveCarousel(-1));
+    document.getElementById('carousel-next-btn').addEventListener('click', () => moveCarousel(1));
+
+    // Modal setup
+    document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+    document.getElementById('modal-close-backdrop').addEventListener('click', closeModal);
+
+    // Custom Video Player events
+    setupPlayerEvents();
+  }
 });
 
 // 4. Prime-style Dashboard Dashboard Transitions
@@ -542,7 +743,7 @@ function switchToDashboard() {
 
   // Load content
   initCarousel();
-  renderDashboardRows();
+  initURLRouting();
 }
 
 // 5. Hero Widescreen Carousel Setup
@@ -914,38 +1115,7 @@ function isItemInWatchlist(itemId) {
 
 // 8. Detailed Modal Handlers
 function openDetails(itemId) {
-  const item = mediaData.find(m => m.id === itemId);
-  if (!item) return;
-
-  state.currentItem = item;
-  
-  // Populate details
-  document.getElementById('modal-title').textContent = item.title;
-  document.getElementById('modal-rating').textContent = item.rating;
-  document.getElementById('modal-year').textContent = item.year;
-  document.getElementById('modal-duration').textContent = item.duration;
-  document.getElementById('modal-genres').textContent = item.genres;
-  document.getElementById('modal-description').textContent = item.description;
-  document.getElementById('modal-cast').textContent = item.cast || 'N/A';
-  
-  // Set up player background poster
-  const posterBg = document.getElementById('player-poster-bg');
-  posterBg.style.backgroundImage = `url('${item.bannerImage || item.image}')`;
-  document.getElementById('player-tag').textContent = item.type === 'sports' ? 'Live Sports' : 'Blue Sky Premium';
-  
-  // Pause any background auto-scrolling
-  stopCarouselAutoSlide();
-
-  // Reset player variables
-  resetPlayerState();
-
-  // Load Similar Content recommendations
-  renderSimilarContent(item);
-
-  // Show Modal
-  const modal = document.getElementById('detail-modal');
-  modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden'; // Lock background scroll
+  window.location.href = `watch.html?id=${itemId}`;
 }
 
 function closeModal() {
@@ -955,6 +1125,7 @@ function closeModal() {
   
   // Reset and pause player state
   pauseVideo();
+  state.currentItem = null; // Prevent background reload of the stream
   resetPlayerState();
 
   // Resume carousel if on main dashboard
@@ -1017,8 +1188,15 @@ function setupPlayerEvents() {
   // Drag timeline slider
   timelineSlider.addEventListener('input', (e) => {
     const percent = e.target.value;
-    state.playerCurrentTime = Math.round((percent / 100) * state.playerDuration);
-    updateTimelineUI();
+    const video = document.getElementById('main-video-player');
+    if (state.currentItem && state.currentItem.videoUrl) {
+      if (!state.currentItem.isLive && video.duration) {
+        video.currentTime = (percent / 100) * video.duration;
+      }
+    } else {
+      state.playerCurrentTime = Math.round((percent / 100) * state.playerDuration);
+      updateTimelineUI();
+    }
   });
 
   // Fullscreen trigger API
@@ -1038,16 +1216,96 @@ function setupPlayerEvents() {
       }
     }
   });
+
+  // Set up real HTML5 video element listeners if it is used
+  const video = document.getElementById('main-video-player');
+  if (video) {
+    video.addEventListener('play', () => {
+      state.playerPlaying = true;
+      updatePlayButtonUI();
+      const display = document.getElementById('video-display');
+      display.classList.add('playing');
+    });
+    video.addEventListener('pause', () => {
+      state.playerPlaying = false;
+      updatePlayButtonUI();
+      const display = document.getElementById('video-display');
+      display.classList.remove('playing');
+    });
+    video.addEventListener('waiting', () => {
+      document.getElementById('video-spinner').classList.remove('hidden');
+    });
+    video.addEventListener('playing', () => {
+      document.getElementById('video-spinner').classList.add('hidden');
+    });
+    video.addEventListener('timeupdate', () => {
+      if (state.currentItem && state.currentItem.videoUrl && !state.currentItem.isLive) {
+        state.playerCurrentTime = Math.round(video.currentTime);
+        state.playerDuration = Math.round(video.duration || 0);
+        updateTimelineUI();
+      }
+    });
+  }
+}
+
+let hlsInstance = null;
+
+function initRealVideoPlayer() {
+  const video = document.getElementById('main-video-player');
+  if (!video) return;
+
+  const item = state.currentItem;
+  if (item && item.videoUrl) {
+    video.style.display = 'block';
+    
+    // Set initial volume & muted state from app state
+    video.volume = state.playerVolume / 100;
+    video.muted = state.playerMuted;
+
+    // Load stream
+    const videoUrl = item.videoUrl;
+    if (Hls.isSupported()) {
+      if (hlsInstance) {
+        hlsInstance.destroy();
+      }
+      hlsInstance = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true
+      });
+      hlsInstance.loadSource(videoUrl);
+      hlsInstance.attachMedia(video);
+      hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+        console.log("HLS Manifest parsed, ready to play");
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = videoUrl;
+    }
+  } else {
+    video.style.display = 'none';
+    video.src = '';
+    if (hlsInstance) {
+      hlsInstance.destroy();
+      hlsInstance = null;
+    }
+  }
 }
 
 function resetPlayerState() {
   state.playerPlaying = false;
   state.playerCurrentTime = 0;
   
+  // Initialize or reset real video player
+  initRealVideoPlayer();
+
   if (state.currentItem && state.currentItem.type === 'sports' && state.currentItem.subType === 'live') {
     state.playerDuration = 10800; // 3 hours in seconds for matches
   } else {
     state.playerDuration = 8100; // 2h 15m in seconds for typical movies
+  }
+  
+  const timelineSlider = document.getElementById('player-timeline');
+  if (timelineSlider) {
+    timelineSlider.disabled = false;
   }
   
   updateTimelineUI();
@@ -1072,56 +1330,78 @@ function togglePlayState() {
 }
 
 function playVideo() {
-  const spinner = document.getElementById('video-spinner');
-  spinner.classList.remove('hidden');
-  
-  // Simulate buffering for 800ms
-  setTimeout(() => {
-    spinner.classList.add('hidden');
-    state.playerPlaying = true;
+  const video = document.getElementById('main-video-player');
+  if (state.currentItem && state.currentItem.videoUrl) {
+    video.play().catch(err => {
+      console.error("Playback failed:", err);
+      // Fallback if browser blocks autoplay
+      state.playerPlaying = false;
+      updatePlayButtonUI();
+    });
+  } else {
+    const spinner = document.getElementById('video-spinner');
+    spinner.classList.remove('hidden');
     
-    // Play state overlay animation pulse
+    // Simulate buffering for 800ms
+    setTimeout(() => {
+      spinner.classList.add('hidden');
+      state.playerPlaying = true;
+      
+      // Play state overlay animation pulse
+      const playOverlay = document.getElementById('play-state-overlay');
+      playOverlay.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>';
+      playOverlay.classList.add('show');
+      setTimeout(() => playOverlay.classList.remove('show'), 500);
+
+      const display = document.getElementById('video-display');
+      display.classList.add('playing');
+
+      updatePlayButtonUI();
+      
+      // Start timeline progress
+      clearInterval(state.playerInterval);
+      state.playerInterval = setInterval(() => {
+        state.playerCurrentTime++;
+        if (state.playerCurrentTime >= state.playerDuration) {
+          pauseVideo();
+          state.playerCurrentTime = 0;
+        }
+        updateTimelineUI();
+      }, 1000);
+    }, 650);
+  }
+}
+
+function pauseVideo() {
+  const video = document.getElementById('main-video-player');
+  if (state.currentItem && state.currentItem.videoUrl) {
+    video.pause();
+  } else {
+    state.playerPlaying = false;
+    clearInterval(state.playerInterval);
+    
     const playOverlay = document.getElementById('play-state-overlay');
-    playOverlay.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>';
+    playOverlay.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>';
     playOverlay.classList.add('show');
     setTimeout(() => playOverlay.classList.remove('show'), 500);
 
     const display = document.getElementById('video-display');
-    display.classList.add('playing');
+    display.classList.remove('playing');
 
     updatePlayButtonUI();
-    
-    // Start timeline progress
-    clearInterval(state.playerInterval);
-    state.playerInterval = setInterval(() => {
-      state.playerCurrentTime++;
-      if (state.playerCurrentTime >= state.playerDuration) {
-        pauseVideo();
-        state.playerCurrentTime = 0;
-      }
-      updateTimelineUI();
-    }, 1000);
-  }, 650);
-}
-
-function pauseVideo() {
-  state.playerPlaying = false;
-  clearInterval(state.playerInterval);
-  
-  const playOverlay = document.getElementById('play-state-overlay');
-  playOverlay.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>';
-  playOverlay.classList.add('show');
-  setTimeout(() => playOverlay.classList.remove('show'), 500);
-
-  const display = document.getElementById('video-display');
-  display.classList.remove('playing');
-
-  updatePlayButtonUI();
+  }
 }
 
 function skipTime(seconds) {
-  state.playerCurrentTime = Math.max(0, Math.min(state.playerDuration, state.playerCurrentTime + seconds));
-  updateTimelineUI();
+  const video = document.getElementById('main-video-player');
+  if (state.currentItem && state.currentItem.videoUrl) {
+    if (!state.currentItem.isLive) {
+      video.currentTime = Math.max(0, Math.min(video.duration || 0, video.currentTime + seconds));
+    }
+  } else {
+    state.playerCurrentTime = Math.max(0, Math.min(state.playerDuration, state.playerCurrentTime + seconds));
+    updateTimelineUI();
+  }
 }
 
 function toggleMute() {
@@ -1158,6 +1438,13 @@ function updateVolumeUI() {
     iconMuted.classList.add('hidden');
     volumeSlider.value = state.playerVolume;
   }
+
+  // Update actual video player volume if active
+  const video = document.getElementById('main-video-player');
+  if (video && state.currentItem && state.currentItem.videoUrl) {
+    video.volume = state.playerMuted ? 0 : (state.playerVolume / 100);
+    video.muted = state.playerMuted;
+  }
 }
 
 function updateTimelineUI() {
@@ -1166,14 +1453,23 @@ function updateTimelineUI() {
   const timelineSlider = document.getElementById('player-timeline');
   const progressFill = document.getElementById('player-progress');
 
-  // Format times as string (h:mm:ss or m:ss)
-  currentTimeText.textContent = formatTime(state.playerCurrentTime);
-  totalTimeText.textContent = formatTime(state.playerDuration);
+  if (state.currentItem && state.currentItem.isLive) {
+    currentTimeText.textContent = "LIVE";
+    totalTimeText.textContent = "Live Stream";
+    timelineSlider.value = 100;
+    progressFill.style.width = '100%';
+    timelineSlider.disabled = true;
+  } else {
+    timelineSlider.disabled = false;
+    // Format times as string (h:mm:ss or m:ss)
+    currentTimeText.textContent = formatTime(state.playerCurrentTime);
+    totalTimeText.textContent = formatTime(state.playerDuration);
 
-  // Update slider position
-  const percentage = (state.playerCurrentTime / state.playerDuration) * 100;
-  timelineSlider.value = percentage || 0;
-  progressFill.style.width = `${percentage}%`;
+    // Update slider position
+    const percentage = (state.playerCurrentTime / state.playerDuration) * 100;
+    timelineSlider.value = percentage || 0;
+    progressFill.style.width = `${percentage}%`;
+  }
 }
 
 function formatTime(seconds) {
@@ -1267,30 +1563,27 @@ function handleNameSubmit() {
   const name = nameInput.value.trim();
   if (name.length < 2) return;
 
-  // Transition with a Chrome-style loader spinner
-  showLoader(() => {
-    const profiles = loadProfiles();
-    // Check if profile with this name already exists
-    let existingProfile = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
-    if (!existingProfile) {
-      // Create new profile with this name
-      const avatarData = getUnusedAvatar(profiles, false);
-      existingProfile = {
-        id: 'p_' + Date.now(),
-        name: name,
-        avatarTemplateId: avatarData.avatarTemplateId,
-        avatarUrl: avatarData.imageUrl,
-        isKids: false,
-        watchlist: []
-      };
-      profiles.push(existingProfile);
-      localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
-      state.profiles = profiles;
-    }
-    
-    // Transition directly to the "Who's watching?" selection screen
-    showProfileSelector();
-  }, 1000);
+  const profiles = loadProfiles();
+  // Check if profile with this name already exists
+  let existingProfile = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
+  if (!existingProfile) {
+    // Create new profile with this name
+    const avatarData = getUnusedAvatar(profiles, false);
+    existingProfile = {
+      id: 'p_' + Date.now(),
+      name: name,
+      avatarTemplateId: avatarData.avatarTemplateId,
+      avatarUrl: avatarData.imageUrl,
+      isKids: false,
+      watchlist: []
+    };
+    profiles.push(existingProfile);
+    localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
+    state.profiles = profiles;
+  }
+  
+  // Native redirect to index.html to show profile selection page
+  window.location.href = 'index.html';
 }
 
 function generateBlueAvatarBase64() {
@@ -1517,18 +1810,11 @@ function selectProfile(profileId) {
   const profile = profiles.find(p => p.id === profileId);
   if (!profile) return;
 
-  // Safe chrome loading transition
-  showLoader(() => {
-    state.activeProfile = profile;
-    state.userName = profile.name;
-    localStorage.setItem('bluesky_active_profile_id', profile.id);
-    localStorage.setItem('bluesky_username', profile.name);
+  localStorage.setItem('bluesky_active_profile_id', profile.id);
+  localStorage.setItem('bluesky_username', profile.name);
 
-    // Hide selection screen and swap dashboard visibility
-    const welcomeScreen = document.getElementById('welcome-screen');
-    if (welcomeScreen) welcomeScreen.classList.add('hidden');
-    switchToDashboard();
-  }, 1100);
+  // Native reload to dashboard, spinning Chrome loader
+  window.location.href = 'index.html';
 }
 
 function renderAddProfileForm() {
@@ -1726,8 +2012,7 @@ function deleteProfile(profileId) {
 }
 
 function cancelProfileForm() {
-  state.manageProfilesMode = false;
-  renderProfileSelection();
+  window.location.href = 'index.html';
 }
 
 function renderQuickSwitchList() {
@@ -1759,62 +2044,38 @@ function renderQuickSwitchList() {
     `;
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      // Transition switch
-      showLoader(() => {
-        state.activeProfile = p;
-        state.userName = p.name;
-        localStorage.setItem('bluesky_active_profile_id', p.id);
-        localStorage.setItem('bluesky_username', p.name);
-        
-        const dropdownMenu = document.getElementById('profile-dropdown-menu');
-        if (dropdownMenu) dropdownMenu.classList.remove('show');
-        
-        switchToDashboard();
-      }, 1000);
+      localStorage.setItem('bluesky_active_profile_id', p.id);
+      localStorage.setItem('bluesky_username', p.name);
+      
+      const isWatch = window.location.pathname.includes('watch.html');
+      if (isWatch) {
+        window.location.reload();
+      } else {
+        window.location.href = 'index.html';
+      }
     });
     switchContainer.appendChild(btn);
   });
 }
 
 function showProfileSelector() {
-  // Safe transition to switcher
-  showLoader(() => {
-    document.getElementById('main-dashboard').classList.add('hidden');
-    const welcomeScreen = document.getElementById('welcome-screen');
-    welcomeScreen.classList.remove('hidden');
-    welcomeScreen.classList.remove('fade-out');
-    localStorage.removeItem('bluesky_active_profile_id');
-    renderProfileSelection();
-  }, 900);
+  localStorage.removeItem('bluesky_active_profile_id');
+  window.location.href = 'index.html';
 }
 
 function showAddProfileForm() {
-  showLoader(() => {
-    document.getElementById('main-dashboard').classList.add('hidden');
-    const welcomeScreen = document.getElementById('welcome-screen');
-    welcomeScreen.classList.remove('hidden');
-    welcomeScreen.classList.remove('fade-out');
-    renderAddProfileForm();
-  }, 900);
+  localStorage.removeItem('bluesky_active_profile_id');
+  window.location.href = 'index.html?addProfile=true';
 }
 
 // 5. Sign Out Active Profile (returns directly to Enter name form with loader)
 function signOutActiveProfile() {
-  showLoader(() => {
-    localStorage.removeItem('bluesky_active_profile_id');
-    localStorage.removeItem('bluesky_username');
-    state.activeProfile = null;
-    state.userName = '';
-    
-    // Toggle active classes and display name form
-    document.getElementById('main-dashboard').classList.add('hidden');
-    const welcomeScreen = document.getElementById('welcome-screen');
-    if (welcomeScreen) {
-      welcomeScreen.classList.remove('hidden');
-      welcomeScreen.classList.remove('fade-out');
-    }
-    renderEnterNameForm();
-  }, 1100);
+  localStorage.removeItem('bluesky_active_profile_id');
+  localStorage.removeItem('bluesky_username');
+  state.activeProfile = null;
+  state.userName = '';
+  
+  window.location.href = 'index.html';
 }
 
 function clearAllProfiles() {

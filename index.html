@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <!-- Hls.js for playing IPTV live streams (.m3u8) -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
 
@@ -206,6 +208,7 @@
       <div class="modal-player-container">
         <!-- Fake Video / Graphic Layer -->
         <div class="video-display" id="video-display">
+          <video id="main-video-player" style="width: 100%; height: 100%; object-fit: cover; display: none; position: absolute; top: 0; left: 0; z-index: 1;" playsinline></video>
           <div class="video-poster-bg" id="player-poster-bg"></div>
           <div class="video-overlay">
             <div class="video-loading-spinner hidden" id="video-spinner"></div>
