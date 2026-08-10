@@ -44,16 +44,9 @@
     <!-- Header Navigation -->
     <header class="main-header">
       <div class="header-left">
-        <!-- Hamburger Menu Button (3 Lines) -->
-        <button class="hamburger-menu-btn" id="hamburger-menu-btn" aria-label="Menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-
-      <div class="header-logo" id="header-logo-btn">
-        <img src="logo.png" alt="Blue Sky Logo">
+        <div class="header-logo" id="header-logo-btn">
+          <img src="logo.png" alt="Blue Sky Logo">
+        </div>
       </div>
 
       <div class="header-right">
@@ -296,6 +289,50 @@
             <!-- Loaded dynamically based on item selected -->
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- PHASE 4: DEDICATED SEARCH OVERLAY (MOBILE VIEW DESIGN) -->
+  <!-- ========================================== -->
+  <div id="search-overlay" class="search-overlay hidden">
+    <div class="search-overlay-header">
+      <button class="search-back-btn" id="search-back-btn" aria-label="Go Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
+      <div class="search-bar-input-wrapper">
+        <input type="text" id="overlay-search-input" placeholder="Search for 'action'" autocomplete="off">
+        <button class="clear-search-btn hidden" id="overlay-clear-search-btn">&times;</button>
+      </div>
+      <button class="search-mic-btn" aria-label="Voice Search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="search-overlay-content">
+      <div class="trending-section">
+        <h3 class="trending-title">Trending in</h3>
+        <div class="trending-tags-container">
+          <button class="trending-tag active">India</button>
+          <button class="trending-tag">Movies</button>
+          <button class="trending-tag">Shows</button>
+          <button class="trending-tag">Action</button>
+          <button class="trending-tag">Comedy</button>
+          <button class="trending-tag">Sports</button>
+        </div>
+      </div>
+
+      <div class="search-results-grid" id="overlay-search-results">
+        <!-- Dynamic posters loaded here -->
       </div>
     </div>
   </div>

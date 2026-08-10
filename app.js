@@ -298,6 +298,104 @@ const mediaData = [
     duration: 'Season 1 • 6 Episodes',
     genres: 'Technology • Science • Future',
     cast: 'Mark Zuckerberg, Palmer Luckey, Demis Hassabis'
+  },
+  {
+    id: 'trending_1',
+    type: 'tv',
+    title: 'Khatron Ke Khiladi',
+    hindiTitle: 'खतरों के खिलाड़ी',
+    subtitle: 'Stunt Reality Show',
+    description: 'Fear Factor: Khatron Ke Khiladi is an Indian stunt reality television series based on the American series Fear Factor. Contestants face their worst fears in high-octane stunts.',
+    image: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80',
+    rating: 'IMDb 8.1',
+    year: '2026',
+    duration: 'Season 14 • 20 Episodes',
+    genres: 'Reality • Action • Adventure',
+    cast: 'Rohit Shetty, Abhishek Kumar, Shalin Bhanot',
+    isNewRelease: true,
+    isTrending: true
+  },
+  {
+    id: 'trending_2',
+    type: 'tv',
+    title: 'Yeh Rishta Kya Kehlata Hai',
+    hindiTitle: 'ये रिश्ता क्या कहलाता है',
+    subtitle: 'Family Drama Series',
+    description: 'A long-running Indian television drama series that explores the values, relationships, and complexities of a large family in Udaipur.',
+    image: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=400&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80',
+    rating: 'IMDb 7.2',
+    year: '2026',
+    duration: 'Season 1 • 3000+ Episodes',
+    genres: 'Drama • Family • Romance',
+    cast: 'Samridhii Shukla, Rohit Purohit',
+    isTrending: true
+  },
+  {
+    id: 'trending_3',
+    type: 'tv',
+    title: 'Anupama',
+    hindiTitle: 'अनुपमा',
+    subtitle: 'Drama Series',
+    description: 'Anupamaa, a homemaker, sacrifices her ambitions and goals to raise her family. Homemaker Anupama feels devalued and decides to live life on her own terms.',
+    image: 'https://images.unsplash.com/photo-1608155686393-8fdd966d784d?auto=format&fit=crop&w=400&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1608155686393-8fdd966d784d?auto=format&fit=crop&w=800&q=80',
+    rating: 'IMDb 7.5',
+    year: '2026',
+    duration: 'Season 1 • 1200+ Episodes',
+    genres: 'Drama • Family • Women Empowerment',
+    cast: 'Rupali Ganguly, Gaurav Khanna',
+    isTrending: true
+  },
+  {
+    id: 'trending_4',
+    type: 'tv',
+    title: 'Ye Fitoor Mera',
+    hindiTitle: 'ये फ़ितूर तेरा',
+    subtitle: 'Romantic Drama Series',
+    description: 'A passionate love story of two individuals from different walks of life, fighting against society and their own internal conflicts to stay together.',
+    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80',
+    rating: 'IMDb 8.4',
+    year: '2026',
+    duration: 'Season 1 • 12 Episodes',
+    genres: 'Romance • Drama • Passion',
+    cast: 'Ranbir Kapoor, Alia Bhatt',
+    isNewRelease: true,
+    isTrending: true
+  },
+  {
+    id: 'trending_5',
+    type: 'tv',
+    title: 'Dr. Aarambh',
+    hindiTitle: 'Dr. आरंभ',
+    subtitle: 'Medical Drama',
+    description: 'Follow the life of Dr. Aarambh, a brilliant but unconventional surgeon, as he navigates the complex politics of a premier hospital while saving lives.',
+    image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80',
+    rating: 'IMDb 8.6',
+    year: '2026',
+    duration: 'Season 1 • 10 Episodes',
+    genres: 'Drama • Medical • Mystery',
+    cast: 'Ayushmann Khurrana, Sobhita Dhulipala',
+    isTrending: true
+  },
+  {
+    id: 'trending_6',
+    type: 'tv',
+    title: 'Tum Dena Saath Mera',
+    hindiTitle: 'तुम देना साथ मेरा',
+    subtitle: 'Emotional Drama Series',
+    description: 'A touching story of friendship, love, and loyalty that tests the bonds of a young couple through various life challenges and triumphs.',
+    image: 'https://images.unsplash.com/photo-1464746133101-a2c3f88e0dd9?auto=format&fit=crop&w=400&q=80',
+    bannerImage: 'https://images.unsplash.com/photo-1464746133101-a2c3f88e0dd9?auto=format&fit=crop&w=800&q=80',
+    rating: 'IMDb 7.9',
+    year: '2026',
+    duration: 'Season 1 • 45 Episodes',
+    genres: 'Drama • Family • Friendship',
+    cast: 'Kartik Aaryan, Kiara Advani',
+    isTrending: true
   }
 ];
 
@@ -316,10 +414,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (welcomeScreen) welcomeScreen.classList.add('hidden');
       switchToDashboard();
     } else {
-      renderEnterNameForm();
+      renderProfileSelection();
     }
   } else {
-    renderEnterNameForm();
+    if (state.profiles && state.profiles.length > 0) {
+      renderProfileSelection();
+    } else {
+      renderEnterNameForm();
+    }
   }
 
   // Handle splash screen preloader timeout
@@ -371,58 +473,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Set up dynamic expandable search typing filter
-  const searchInput = document.getElementById('search-input');
-  const clearSearchBtn = document.getElementById('clear-search-btn');
+  // Set up search overlay triggers
   const searchToggleBtn = document.getElementById('search-toggle-btn');
-  const searchWrapper = document.getElementById('search-input-wrapper');
-  const searchContainer = document.getElementById('search-container');
-
-  if (searchToggleBtn && searchWrapper) {
+  if (searchToggleBtn) {
     searchToggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isCollapsed = searchWrapper.classList.contains('collapsed');
-      if (isCollapsed) {
-        searchWrapper.classList.remove('collapsed');
-        searchInput.focus();
-      } else {
-        if (!state.searchQuery) {
-          searchWrapper.classList.add('collapsed');
-        }
-      }
-    });
-
-    // Close/collapse search wrapper on click outside
-    document.addEventListener('click', (e) => {
-      if (searchContainer && !searchContainer.contains(e.target) && !state.searchQuery) {
-        searchWrapper.classList.add('collapsed');
-      }
+      openSearchOverlay();
     });
   }
-
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      state.searchQuery = e.target.value;
-      if (state.searchQuery.trim()) {
-        clearSearchBtn.classList.remove('hidden');
-      } else {
-        clearSearchBtn.classList.add('hidden');
-      }
-      filterContent();
-    });
-  }
-
-  // Clear search trigger
-  if (clearSearchBtn) {
-    clearSearchBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      searchInput.value = '';
-      state.searchQuery = '';
-      clearSearchBtn.classList.add('hidden');
-      filterContent();
-      searchInput.focus();
-    });
-  }
+  
+  // Set up search overlay interaction events
+  setupSearchOverlayEvents();
 
   // Reset filter button
   const resetBtn = document.getElementById('reset-filters-btn');
@@ -1337,13 +1398,18 @@ const AVATAR_TEMPLATES = [
 
 function loadProfiles() {
   let profiles = JSON.parse(localStorage.getItem('bluesky_profiles'));
-  if (!profiles || profiles.length === 0) {
+  const seeded = localStorage.getItem('bluesky_profiles_seeded');
+  
+  if (!profiles && !seeded) {
     // Seed default profiles matching user screenshots
     profiles = [
       { id: 'p_1', name: 'Ashish', avatarTemplateId: 'av_1', avatarUrl: generateBlueAvatarBase64(), isKids: false, watchlist: [] },
       { id: 'p_2', name: 'Kids', avatarTemplateId: 'av_2', avatarUrl: generateKidsAvatarBase64(), isKids: true, watchlist: [] }
     ];
     localStorage.setItem('bluesky_profiles', JSON.stringify(profiles));
+    localStorage.setItem('bluesky_profiles_seeded', 'true');
+  } else if (!profiles) {
+    profiles = [];
   }
   state.profiles = profiles;
   return profiles;
@@ -1381,15 +1447,22 @@ function renderProfileSelection() {
   profiles.forEach(profile => {
     gridHTML += `
       <div class="profile-item" onclick="handleProfileClick('${profile.id}')">
-        <div class="profile-avatar-card">
-          <img src="${profile.avatarUrl}" alt="${profile.name}" style="width: 100%; height: 100%; object-fit: cover;">
+        <div class="profile-avatar-wrapper" style="position: relative;">
+          <div class="profile-avatar-card">
+            <img src="${profile.avatarUrl}" alt="${profile.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            ${state.manageProfilesMode ? `
+              <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; border-radius: 50%;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 32px; height: 32px; color: #fff;">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+              </div>
+            ` : ''}
+          </div>
           ${state.manageProfilesMode ? `
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; border-radius: 50%;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 32px; height: 32px; color: #fff;">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-            </div>
+            <button class="profile-direct-delete-btn" onclick="event.stopPropagation(); deleteProfile('${profile.id}')" title="Delete Profile">
+              &times;
+            </button>
           ` : ''}
         </div>
         <span class="profile-name-text">${profile.name}</span>
@@ -1539,11 +1612,9 @@ function renderEditProfileForm(profileId) {
             <button type="button" class="btn-secondary" onclick="cancelProfileForm()">Cancel</button>
             <button type="submit" class="btn-primary" style="flex: 1; padding: 15px; border-radius: 12px; font-weight: 600; font-size: 15px;">Save</button>
           </div>
-          ${profiles.length > 1 ? `
-            <button type="button" class="btn-secondary" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--danger); border-radius: 12px; padding: 12px;" onclick="deleteProfile('${profile.id}')">
-              Delete Profile
-            </button>
-          ` : ''}
+          <button type="button" class="btn-secondary" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--danger); border-radius: 12px; padding: 12px;" onclick="deleteProfile('${profile.id}')">
+            Delete Profile
+          </button>
         </div>
       </form>
     </div>
@@ -1641,9 +1712,16 @@ function deleteProfile(profileId) {
     const activeId = localStorage.getItem('bluesky_active_profile_id');
     if (activeId === profileId) {
       localStorage.removeItem('bluesky_active_profile_id');
+      state.activeProfile = null;
+      state.userName = '';
     }
     
-    cancelProfileForm();
+    if (profiles.length === 0) {
+      state.manageProfilesMode = false;
+      renderEnterNameForm();
+    } else {
+      cancelProfileForm();
+    }
   }
 }
 
@@ -1741,7 +1819,172 @@ function signOutActiveProfile() {
 
 function clearAllProfiles() {
   localStorage.removeItem('bluesky_profiles');
+  localStorage.removeItem('bluesky_profiles_seeded');
   localStorage.removeItem('bluesky_active_profile_id');
   localStorage.removeItem('bluesky_username');
   location.reload();
+}
+
+// ==========================================================================
+// DEDICATED SEARCH OVERLAY FUNCTIONS
+// ==========================================================================
+let activeSearchTag = 'India';
+
+function openSearchOverlay() {
+  const overlay = document.getElementById('search-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden'; // Lock background scroll
+  
+  const input = document.getElementById('overlay-search-input');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  
+  // Reset active tag to India
+  activeSearchTag = 'India';
+  const tags = document.querySelectorAll('.trending-tag');
+  tags.forEach(tag => {
+    if (tag.textContent.trim() === 'India') {
+      tag.classList.add('active');
+    } else {
+      tag.classList.remove('active');
+    }
+  });
+  
+  renderSearchOverlayResults('');
+}
+
+function closeSearchOverlay() {
+  const overlay = document.getElementById('search-overlay');
+  if (!overlay) return;
+  overlay.classList.add('hidden');
+  document.body.style.overflow = ''; // Unlock scroll
+  
+  // Resume carousel if needed
+  if (state.activeTab === 'all' && !state.searchQuery) {
+    startCarouselAutoSlide();
+  }
+}
+
+function setupSearchOverlayEvents() {
+  const backBtn = document.getElementById('search-back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', closeSearchOverlay);
+  }
+  
+  const input = document.getElementById('overlay-search-input');
+  const clearBtn = document.getElementById('overlay-clear-search-btn');
+  if (input) {
+    input.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (val.trim()) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderSearchOverlayResults(val);
+    });
+  }
+  
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      clearBtn.classList.add('hidden');
+      renderSearchOverlayResults('');
+      input.focus();
+    });
+  }
+  
+  // Chips filter selection
+  const tags = document.querySelectorAll('.trending-tag');
+  tags.forEach(tag => {
+    tag.addEventListener('click', () => {
+      tags.forEach(t => t.classList.remove('active'));
+      tag.classList.add('active');
+      activeSearchTag = tag.textContent.trim();
+      
+      const query = input ? input.value : '';
+      renderSearchOverlayResults(query);
+    });
+  });
+  
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeSearchOverlay();
+    }
+  });
+}
+
+function renderSearchOverlayResults(query) {
+  const grid = document.getElementById('overlay-search-results');
+  if (!grid) return;
+  
+  grid.innerHTML = '';
+  
+  // Filter mediaData
+  const cleanQuery = query.trim().toLowerCase();
+  
+  let filtered = mediaData;
+  
+  // If there's an active tag filter
+  if (activeSearchTag && !cleanQuery) {
+    if (activeSearchTag === 'India') {
+      // Show Hindi titles / Indian content
+      filtered = mediaData.filter(item => item.hindiTitle || item.isTrending);
+    } else if (activeSearchTag === 'Movies') {
+      filtered = mediaData.filter(item => item.type === 'movies');
+    } else if (activeSearchTag === 'Shows') {
+      filtered = mediaData.filter(item => item.type === 'tv');
+    } else if (activeSearchTag === 'Action') {
+      filtered = mediaData.filter(item => item.genres.toLowerCase().includes('action'));
+    } else if (activeSearchTag === 'Comedy') {
+      filtered = mediaData.filter(item => item.genres.toLowerCase().includes('comedy'));
+    } else if (activeSearchTag === 'Sports') {
+      filtered = mediaData.filter(item => item.type === 'sports');
+    }
+  } else if (cleanQuery) {
+    filtered = mediaData.filter(item => {
+      return (
+        item.title.toLowerCase().includes(cleanQuery) ||
+        (item.hindiTitle && item.hindiTitle.toLowerCase().includes(cleanQuery)) ||
+        item.subtitle.toLowerCase().includes(cleanQuery) ||
+        item.description.toLowerCase().includes(cleanQuery) ||
+        item.genres.toLowerCase().includes(cleanQuery) ||
+        (item.cast && item.cast.toLowerCase().includes(cleanQuery))
+      );
+    });
+  }
+  
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+        <h3 style="color: var(--text-primary); margin-bottom: 8px;">No results found</h3>
+        <p style="font-size: 14px;">Try searching for something else or browse different tags.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  filtered.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'search-poster-card';
+    card.innerHTML = `
+      <div class="poster-img-wrapper">
+        <img src="${item.image}" alt="${item.title}">
+        ${item.isNewRelease ? `<span class="new-release-badge">NEW RELEASE</span>` : ''}
+        <div class="poster-title-overlay">
+          ${item.hindiTitle ? `<span class="poster-title-hindi">${item.hindiTitle}</span>` : ''}
+          <span class="poster-title-english">${item.title}</span>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => {
+      closeSearchOverlay();
+      openDetails(item.id);
+    });
+    grid.appendChild(card);
+  });
 }
