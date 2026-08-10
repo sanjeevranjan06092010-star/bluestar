@@ -2016,7 +2016,7 @@ function setupSpeechRecognition() {
   
   recognition = new SpeechRecognition();
   recognition.continuous = false;
-  recognition.lang = 'en-US'; // Also supports general speech capture
+  recognition.lang = 'en-IN'; // Optimized for Indian accents, names (Hinglish/Hindi)
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
   
@@ -2026,7 +2026,6 @@ function setupSpeechRecognition() {
   
   recognition.onspeechend = () => {
     showVoiceOverlay(true, "Processing...");
-    recognition.stop();
   };
   
   recognition.onresult = (event) => {
